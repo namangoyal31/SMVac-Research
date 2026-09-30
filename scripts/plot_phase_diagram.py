@@ -30,17 +30,29 @@ SM_REGION = dict(mh=(110.0, 140.0), mt=(155.0, 185.0))
 
 STATUS_COLORS = {1: "#2166ac", 2: "#f7f7f7", 3: "#b2182b", 4: "#878787"}
 STATUS_LABELS = {1: "stable", 2: "metastable", 3: "unstable", 4: "non-perturbative"}
+BREAKDOWN_COLOR = "#f4a582"
+BREAKDOWN_LABEL = "ansatz breakdown ($S \\leq 0$)"
 
 
 def regular_grid(df):
-    """Reshape the Mt-major scan CSV into (Mt, Mh) value grids."""
+    """Reshape the Mt-major scan CSV into (Mt, Mh) value grids.
+
+    Points classified unstable with a non-positive action (the documented
+    breakdown of the conformal ansatz when |lambda_R| -> 0 near the stability
+    boundary) are split into their own category instead of being shown as
+    physical instabilities.
+    """
     mts = np.sort(df["Mt"].unique())
     mhs = np.sort(df["Mh_calc"].unique())
-    step_mh = np.min(np.diff(mhs)) if len(mhs) > 1 else 1.0
     shape = (len(mts), len(mhs))
     order = np.lexsort((df["Mh_calc"], df["Mt"]))
     grids = {}
-    for col in ("Stability", "S_exact", "S_approx"):
+    status = df["Stability"].to_numpy(float)[order].copy()
+    s_exact = df["S_exact"].to_numpy(float)[order]
+    breakdown = (status == 3) & (s_exact <= 0)
+    status[breakdown] = 0.0  # dedicated category
+    grids["Stability"] = status.reshape(shape)
+    for col in ("S_exact", "S_approx"):
         vals = df[col].to_numpy()[order]
         if vals.size != shape[0] * shape[1]:
             raise SystemExit(f"CSV is not a complete regular grid ({vals.size} vs {shape[0]*shape[1]})")
@@ -61,8 +73,9 @@ def plot(input_csv, output, region):
     # Filled classification map (midpoint colors between grid cells).
     status = g["Stability"]
     from matplotlib.colors import ListedColormap, BoundaryNorm
-    cmap = ListedColormap([STATUS_COLORS[i] for i in range(1, 5)])
-    norm = BoundaryNorm([0.5, 1.5, 2.5, 3.5, 4.5], cmap.N)
+    cmap = ListedColormap([BREAKDOWN_COLOR, STATUS_COLORS[1], STATUS_COLORS[2],
+                           STATUS_COLORS[3], STATUS_COLORS[4]])
+    norm = BoundaryNorm([-0.5, 0.5, 1.5, 2.5, 3.5, 4.5], cmap.N)
     mh_edges = np.append(mhs - (mhs[1] - mhs[0]) / 2, mhs[-1] + (mhs[1] - mhs[0]) / 2)
     mt_edges = np.append(mts - (mts[1] - mts[0]) / 2, mts[-1] + (mts[1] - mts[0]) / 2)
     ax.pcolormesh(mh_edges, mt_edges, status, cmap=cmap, norm=norm,
@@ -97,6 +110,8 @@ def plot(input_csv, output, region):
 
     from matplotlib.patches import Patch
     handles = [Patch(facecolor=STATUS_COLORS[s], label=STATUS_LABELS[s]) for s in (1, 2, 3, 4)]
+    if (g["Stability"] == 0).any():
+        handles.insert(3, Patch(facecolor=BREAKDOWN_COLOR, label=BREAKDOWN_LABEL))
     line_handles, line_labels = ax.get_legend_handles_labels()
     ax.legend(handles=handles + line_handles[1:], loc="upper left", framealpha=0.9,
               fontsize=8)

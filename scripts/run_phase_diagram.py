@@ -67,10 +67,11 @@ def main():
     parser.add_argument("--mh-max", type=float, default=140.0)
     parser.add_argument("--step", type=float, default=0.5)
     parser.add_argument("--processes", type=int, default=os.cpu_count() or 4)
-    parser.add_argument("--binary", default=os.path.join("build", "generate_phase_diagram"),
+    parser.add_argument("--binary",
+                        default=os.path.join("build", "generate_phase_diagram" + (".exe" if os.name == "nt" else "")),
                         help="path to the compiled generate_phase_diagram binary")
     parser.add_argument("--output", default=None,
-                        help="aggregated output CSV (default: results/%(mode)s_data.csv)")
+                        help="aggregated output CSV (default: results/<mode>_data.csv)")
     parser.add_argument("--results-dir", default="results")
     parser.add_argument("--keep-chunks", action="store_true")
     args = parser.parse_args()

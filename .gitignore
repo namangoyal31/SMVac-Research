@@ -65,3 +65,6 @@ __pycache__/
 *.pyc
 # CMake build directory
 build/
+
+# Scratch output directory (regenerable)
+results/

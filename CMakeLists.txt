@@ -27,6 +27,9 @@ target_link_libraries(write_reference_tables PRIVATE smvacuumdecay)
 add_executable(convergence_scan apps/convergence_scan.cpp)
 target_link_libraries(convergence_scan PRIVATE smvacuumdecay)
 
+add_executable(dump_diagnostics apps/dump_diagnostics.cpp)
+target_link_libraries(dump_diagnostics PRIVATE smvacuumdecay)
+
 enable_testing()
 
 # All tests run from the source root: the regression tests read the frozen

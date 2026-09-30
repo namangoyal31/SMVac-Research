@@ -19,6 +19,7 @@
 #include <string>
 #include <cstdlib>
 #include <cmath>
+#include <iomanip>
 
 using namespace SMVacuumDecay;
 
@@ -106,6 +107,9 @@ int main(int argc, char* argv[]) {
                   << std::endl;
         return 1;
     }
+    // Enough significant digits that the CSV round-trip does not degrade the
+    // pipeline's own convergence level (~1e-6 relative).
+    file << std::setprecision(12);
 
     if (cfg.use_analytical) {
         file << "Mt,Mh_calc,Stability,S_approx\n";
