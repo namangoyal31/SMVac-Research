@@ -1,53 +1,64 @@
-#include <SMVacuumDecay/EffectivePotential.hpp>
+// Regression test: the RG trajectory at the benchmark point (Mh = 125.1 GeV,
+// Mt = 173.1 GeV) must reproduce the frozen reference table
+// reference/v1.1/rge_reference.csv. These tests guard against unintentional
+// changes to the numerical pipeline; they are NOT independent physics
+// validation (see tests/physics and docs/validation.md for that).
+#include <SMVacuumDecay/RGE.hpp>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
 #include <cmath>
 #include <vector>
+#include <iomanip>
 #include <algorithm>
 
 using namespace SMVacuumDecay;
 
 struct RefPoint {
-    double phi, lambda_eff, V;
+    double mu, g1, g2, g3, yt, lambda;
 };
 
 int main() {
-    std::ifstream in("SMVacuumDecay/reference/v1.0/potential_reference.csv");
+    std::ifstream in("reference/v1.1/rge_reference.csv");
     if (!in.is_open()) {
-        std::cerr << "Could not open potential_reference.csv" << std::endl;
+        std::cerr << "Could not open reference/v1.1/rge_reference.csv "
+                  << "(run from the repository root)" << std::endl;
         return 1;
     }
-    
+
     std::string line;
     std::getline(in, line); // header
-    
+
     std::vector<RefPoint> ref_data;
     while (std::getline(in, line)) {
         if (line.empty()) continue;
         std::stringstream ss(line);
         std::string token;
         RefPoint pt;
-        std::getline(ss, token, ','); pt.phi = std::stod(token);
-        std::getline(ss, token, ','); pt.lambda_eff = std::stod(token);
-        std::getline(ss, token, ','); pt.V = std::stod(token);
+        std::getline(ss, token, ','); pt.mu = std::stod(token);
+        std::getline(ss, token, ','); pt.g1 = std::stod(token);
+        std::getline(ss, token, ','); pt.g2 = std::stod(token);
+        std::getline(ss, token, ','); pt.g3 = std::stod(token);
+        std::getline(ss, token, ','); pt.yt = std::stod(token);
+        std::getline(ss, token, ','); pt.lambda = std::stod(token);
         ref_data.push_back(pt);
     }
-    
-    double Mh = 5.0;
-    double Mt = 105.0;
-    double MPlanck = 1.22e19;
-    
+
+    double Mh = 125.1;
+    double Mt = 173.1;
+    double MPlanck = planck_mass;
+
     StandardModelParameters y_match = get_nnlo_matching(Mh, Mt);
     double t_match = 2 * std::log(Mt);
-    
+
     double t_start = 2 * std::log(1.0);
     double tPlanck = 2 * std::log(MPlanck);
     double dt = 0.1;
-    
+
     RGEHelper rge;
-    
+
+    // Backward
     StandardModelParameters y_rev = y_match;
     double t_rev = t_match;
     rge.add_point(t_rev, y_rev);
@@ -57,7 +68,8 @@ int main() {
         t_rev -= dt;
         rge.add_point(t_rev, y_rev);
     }
-    
+
+    // Forward
     StandardModelParameters y_fwd = y_match;
     double t_fwd = t_match;
     dt = 0.1;
@@ -67,31 +79,27 @@ int main() {
         t_fwd += dt;
         rge.add_point(t_fwd, y_fwd);
     }
-    
+
     double max_err = 0;
-    
+
     for (const auto& ref : ref_data) {
-        double t = 2.0 * std::log(ref.phi);
+        double t = 2.0 * std::log(ref.mu);
         StandardModelParameters p = rge.get_params(t);
-        double lam_eff = get_lambda_eff(p);
-        double V = V_eff(ref.phi, rge);
-        
-        double err_lam = std::abs(lam_eff - ref.lambda_eff);
-        double err_V;
-        if (std::abs(ref.V) > 1e-30) {
-             err_V = std::abs((V - ref.V) / ref.V);
-        } else {
-             err_V = std::abs(V - ref.V);
-        }
-        
-        double cur_max = std::max({err_lam, err_V});
+
+        double err_g1 = std::abs(p.g1 - ref.g1);
+        double err_g2 = std::abs(p.g2 - ref.g2);
+        double err_g3 = std::abs(p.g3 - ref.g3);
+        double err_yt = std::abs(p.yt - ref.yt);
+        double err_lam = std::abs(p.lambda - ref.lambda);
+
+        double cur_max = std::max({err_g1, err_g2, err_g3, err_yt, err_lam});
         if (cur_max > max_err) {
             max_err = cur_max;
         }
     }
-    
-    std::cout << "Potential Validation Max Error: " << std::scientific << max_err << std::endl;
-    
+
+    std::cout << "RGE Regression Max Error: " << std::scientific << max_err << std::endl;
+
     if (max_err < 1e-12) {
         std::cout << "PASS" << std::endl;
         return 0;
