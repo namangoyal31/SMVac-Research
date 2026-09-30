@@ -59,15 +59,48 @@ int main() {
     std::printf("Simpson sin: err(128)=%.3e err(256)=%.3e observed order=%.2f\n", q1, q2, order_s);
     CHECK_LT(3.0, order_s, "simpson-order");
 
-    // --- Golden-section search on a parabola with a known minimum ---
+    // --- Golden-section search: contracts and resolution limits ---
+    //
+    // For f(x) = (x - x*)^2 + c with value comparisons, GSS can localize the
+    // minimizer only to |dx| ~ sqrt(eps*|c|): near the minimum the quadratic
+    // signal (x-x*)^2 drops below the double-precision rounding of f
+    // (eps*|c| ~ 1.6e-15 for c = 7, i.e. |dx| ~ 4e-8), and comparisons are
+    // decided by rounding noise. The final bracket midpoint may therefore
+    // sit anywhere within ~4e-8 of x*, platform-dependently (observed:
+    // 5e-10 with MinGW, 2.1e-8 with GCC/ubuntu). This is a property of
+    // value-comparison minimization, not an implementation error: the
+    // bracket itself contracts exactly to the requested tolerance.
+    //
+    // The checks below therefore test the algorithm's actual contracts:
+    //  (1) bracket contraction to the requested tolerance (exact invariant),
+    //  (2) function-value optimality within the fp resolution,
+    //  (3) minimizer location within a tolerance ~25x the fp floor
+    //      (any real defect displaces it by orders of magnitude more),
+    // plus a well-conditioned kink function (f = |x - x*|), whose value
+    // comparisons stay exact down to the bracket tolerance: there GSS must
+    // localize x* to ~1e-12, demonstrating that the 4e-8 on the quadratic
+    // is floating-point noise rather than algorithmic failure.
     const double true_min_x = 1.2345;
     auto parab = [&](double logR) { return (logR - true_min_x) * (logR - true_min_x) + 7.0; };
     double lo, hi;
     double best = golden_section_search(-5.0, 8.0, 1e-13, parab, &lo, &hi);
     double min_x = 0.5 * (lo + hi);
-    std::printf("GSS: x=%.10f (true %.10f) f=%.12f\n", min_x, true_min_x, best);
-    CHECK_LT(std::abs(min_x - true_min_x), 1e-8, "gss-location");
-    CHECK_LT(std::abs(best - 7.0), 1e-12, "gss-value");
+    std::printf("GSS quadratic: x=%.12f (true %.12f) f=%.15f bracket width=%.3e\n",
+                min_x, true_min_x, best, hi - lo);
+    CHECK_LT(hi - lo, 1e-12, "gss-bracket-contracted-to-tolerance");
+    CHECK_LT(best - 7.0, 1e-12, "gss-value-optimality");
+    // Location tolerance: sqrt(eps * f(x*)) ~ 3.9e-8 is the fp floor; 1e-6
+    // leaves a 25x margin while still failing for any real defect.
+    CHECK_LT(std::abs(min_x - true_min_x), 1e-6, "gss-location");
+
+    auto kink = [&](double x) { return std::abs(x - true_min_x); };
+    double klo, khi;
+    double kval = golden_section_search(-5.0, 8.0, 1e-13, kink, &klo, &khi);
+    double kink_x = 0.5 * (klo + khi);
+    std::printf("GSS kink:      x=%.12f (true %.12f) f=%.15f bracket width=%.3e\n",
+                kink_x, true_min_x, kval, khi - klo);
+    CHECK_LT(std::abs(kink_x - true_min_x), 1e-12, "gss-kink-location");
+    CHECK_LT(std::abs(kval - 0.0), 1e-12, "gss-kink-value");
 
     if (failures == 0) { std::printf("PASS\n"); return 0; }
     std::printf("FAIL (%d)\n", failures);
