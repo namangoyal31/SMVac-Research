@@ -3,7 +3,15 @@ message: "If you use this software, please cite it as below."
 authors:
   - family-names: "Goyal"
     given-names: "Naman"
-title: "SMVac: Precision Computation of Electroweak Vacuum Stability in the Standard Model"
-version: 1.0.0
-date-released: 2026-07-01
-url: "https://github.com/namangoyal31/SMVac"
+title: "SMVac-Research: Numerical Study of Standard Model Electroweak Vacuum Stability"
+version: 2.0.0
+date-released: "2026-09-30"
+url: "https://github.com/namangoyal31/SMVac-Research"
+description: "Semi-analytical computation of the Standard Model electroweak vacuum decay action via 3-loop RG running, the RG-improved 1-loop effective potential, and the Fubini-Lipatov conformal profile, with validation tests and a stability phase diagram in the Higgs-top mass plane."
+repository-code: "https://github.com/namangoyal31/SMVac-Research"
+keywords:
+  - Standard Model
+  - vacuum stability
+  - bounce action
+  - Fubini-Lipatov
+  - electroweak

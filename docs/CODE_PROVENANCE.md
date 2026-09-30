@@ -1,5 +1,11 @@
 # Code Provenance & Inventory
 
+> **Layout note (v2.0.0):** the paths below refer to the pre-reorganization
+> layout where the library lived under `SMVacuumDecay/`. It is now flattened
+> to the repository root (`include/`, `src/`, `apps/`, `tests/`,
+> `reference/`). The function-to-file mapping is unchanged.
+
+
 This document traces every function from the canonical legacy implementations (`solver_numerical.cpp` and `solver_analytical.cpp`) to their destination in the new `SMVacuumDecay` architecture. It ensures no physics logic is lost or accidentally modified during the migration.
 
 Line numbers refer to the frozen Threshold repository prior to migration (commit `7c9eeff` or local equivalent).

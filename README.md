@@ -1,187 +1,184 @@
-# SMVac
+# SMVac-Research
 
-### Precision Computation of Electroweak Vacuum Stability in the Standard Model
+Numerical study of electroweak vacuum stability in the Standard Model.
 
-SMVac is a computational framework for studying electroweak vacuum stability in the Standard Model. It combines precision renormalization group (RG) evolution with the semiclassical Fubini–Lipatov (conformal) ansatz to estimate the semiclassical vacuum decay action and the corresponding decay rate. Rather than assuming a constant quartic coupling, the code numerically integrates the RG-improved effective potential over the analytical conformal field profile.
----
+This repository implements a semi-analytical bounce-action estimator — the
+Fubini–Lipatov (conformal) profile evaluated on the RG-improved 1-loop
+effective potential — to investigate where the Standard Model vacuum is
+absolutely stable, metastable, or unstable in the $(M_h, M_t)$ plane, and to
+quantify when the strict conformal approximation is adequate.
 
-## Highlights
+![Phase diagram of the Standard Model vacuum](figures/phase_diagram.png)
 
-- Implements 3-loop Standard Model RG evolution.
-- Incorporates next-to-next-to-leading order (NNLO) electroweak matching at the top mass scale.
-- Constructs the 1-loop Coleman–Weinberg effective potential.
-- Evaluates the bounce action using an RG-improved Fubini–Lipatov ansatz.
-- Optimizes the Fubini–Lipatov scale parameter using Golden Section Search.
-- Leverages OpenMP parallelization for dense parameter space sweeps.
+*Stability of the SM vacuum in the Higgs–top mass plane. Blue: the
+RG-improved quartic coupling stays positive up to the Planck scale (absolute
+stability). White: the coupling turns negative but the estimated decay
+action exceeds the age-of-the-universe threshold (metastable). Red: the
+action falls below the threshold. Orange: points where the conformal ansatz
+breaks down (non-positive action) adjacent to the stability boundary — a
+documented artifact of the method, not a physical instability. Contours:
+optimized ansatz action $S$. The star marks the benchmark point
+$(125.1, 173.1)$ GeV; the ellipses show the PDG 2022 $1\sigma$/$2\sigma$
+region.*
 
----
+## What the code computes
 
-## Primary Result
+1. **Matching.** NNLO electroweak matching conditions at the top scale
+   (Buttazzo et al. 2013), linearized around the central masses.
+2. **Running.** The 3-loop SM RG equations for
+   $(g_1, g_2, g_3, y_t, y_b, y_\tau, \lambda)$, integrated by RK4 from
+   $M_t$ to the Planck scale.
+3. **Potential.** The RG-improved 1-loop effective potential
+   $V(\phi) = \lambda_{\rm eff}(\phi)\,\phi^4/4$ with $\mu = \phi$ (the
+   high-field approximation: the false vacuum sits at the origin).
+4. **Action.** The bounce action evaluated on the conformal profile with a
+   running-coupling amplitude, minimized over the profile scale; plus the
+   strict conformal estimate $S_{\rm approx} = 8\pi^2/(3|\lambda_{\min}|)$.
+5. **Classification.** Stable / metastable / unstable via the Coleman
+   criterion $\Gamma/V \sim t_U^{-4}$ with $t_U = 10$ Gyr.
 
-![Phase Diagram](figures/phase_diagram_contours.png)
-*Phase diagram of the Standard Model vacuum across the Higgs–top mass plane, constructed using the RG-improved Fubini–Lipatov action.*
+**Scope and honesty of the method.** The bounce equation is *not* solved;
+the profile family is fixed (conformal) and only its scale is optimized, so
+the reported action is a **variational upper bound** on the true bounce
+action. The *stability boundary* ($\lambda_{\min} = 0$) does not depend on
+the ansatz and is the robust output; absolute lifetimes in the metastable
+region inherit the ansatz systematics. All approximations are documented in
+[docs/theory.md](docs/theory.md) and
+[docs/limitations.md](docs/limitations.md).
 
----
+## Main results (reproduced by the committed example data)
 
-## Features
+* At the benchmark point $(M_h, M_t) = (125.1, 173.1)$ GeV the vacuum is
+  **metastable**: $\lambda_{\rm eff}$ crosses zero at $\mu_1 \simeq
+  6.2\times10^{10}$ GeV, the optimized ansatz action is
+  $S_\ast = 2103.10$ against a threshold of $483$, in agreement with the
+  literature consensus that the SM lifetime exceeds the age of the universe.
+* The **absolute stability boundary** is located at
+  $M_h^{\rm crit} = 129.2$ GeV for $M_t = 173.1$ GeV, within $0.6$ GeV of
+  the published NNLO value $\simeq 128.6$ GeV (enforced as a band check in
+  `tests/physics/test_boundary.cpp`).
+* The RG improvement of the action matters **near the stability boundary**
+  and is negligible deep in the metastable region: the fractional difference
+  from the strict conformal estimate grows from $\sim 0$ at
+  $(115, 180)$ GeV to $\sim +30\%$ at $(134.75, 176.5)$ GeV.
 
-### Physics
-- NNLO top-quark matching conditions.
-- 3-loop beta functions for the gauge couplings ($g_1, g_2, g_3$), top Yukawa ($y_t$), and Higgs quartic ($\lambda$).
-- Semiclassical decay rate estimation via the conformal Fubini–Lipatov approximation evaluated over the RG-improved potential.
+![Running of the effective quartic coupling](figures/lambda_running.png)
 
-### Software
-- Standalone C++ routines for coupling evolution and potential integration.
-- RK4 integration of the Renormalization Group Equations up to the Planck scale.
-- Composite Simpson's rule for integrating the effective potential.
-- Golden Section Search for optimizing the conformal bubble radius parameter.
-- Python-based pipeline for parameter sweeps and Matplotlib visualization.
+*$\lambda_{\rm eff}(\mu)$ for an unstable, the physical, and a near-boundary
+point. The zero crossing and its depth control the decay action.*
 
----
+![Action decomposition](figures/action_curve.png)
 
-## Scientific Motivation
+*The ansatz action $S(R)$ at the benchmark point with its closed-form
+kinetic part and numerically integrated potential part; the golden-section
+minimum defines $S_\ast$. In the pure-quartic limit
+$S_{\rm kin}/|S_{\rm pot}| = 2$.*
 
-The measured values of the Higgs boson and top quark masses place the Standard Model near the boundary between absolute stability and metastability. Standard analytical treatments often rely on the strict Fubini–Lipatov ansatz, which assumes the effective potential is purely quartic ($\lambda \phi^4$) and dominated by a constant negative coupling at very high energy scales. 
+![Fractional error map](figures/error_map.png)
 
-However, near the metastability boundary,the full running of the couplings introduce significant corrections. This repository evaluates a more precise "RG-improved" action. It retains the analytical conformal field profile but numerically integrates the fully running, 1-loop effective potential over that profile. This approach captures the nontrivial shape of the potential while bypassing the computational complexity of solving the full, non-linear Euclidean bounce equation of motion.
+*Fractional difference between the RG-improved and the strict conformal
+action over the metastable region. The conformal approximation fails
+precisely where the metastability classification is most sensitive.*
 
----
+## Quick start
 
-## Architecture
-
-```mermaid
-flowchart LR
-  subgraph Main["Main pipeline — apps/ + scripts/"]
-    RN["scripts/run_numerical.py"]
-    RA["scripts/run_analytical.py"]
-    BIN["apps/generate_phase_diagram.exe<br/>from apps/solver_numerical.cpp"]
-    CHUNK["data/data_numerical_chunk_*.csv"]
-    AGG["data/numerical_data.csv"]
-    PLOT["scripts/plot_numerical_contours.py"]
-    FIG["figures/phase_diagram_contours.png"]
-    RN -- "--numerical s e" --> BIN
-    RA -- "--analytical s e" --> BIN
-    BIN --> CHUNK --> AGG --> PLOT --> FIG
-  end
-```
-
----
-
-## Repository Structure
-
-- **`apps/`**: C++ numerical and analytical solvers (e.g., `solver_numerical.cpp`).
-- **`scripts/`**: Python orchestration and visualization scripts (e.g., `run_numerical.py`).
-- **`data/`**: Output directory for generated CSV datasets.
-- **`figures/`**: Output directory for generated phase diagrams and plots.
-- **`docs/`**: Documentation and verification planning files.
-
----
-
-## Installation
-
-A formal build system (e.g., CMake) is not currently implemented. The solvers must be compiled directly using a C++17 compatible compiler (like `g++`) with OpenMP enabled.
+Requirements: a C++17 compiler (GCC, Clang, MSVC), CMake ≥ 3.10, Python 3
+with `numpy`, `matplotlib`, `pandas` (figures only).
 
 ```bash
-git clone https://github.com/namangoyal31/SMVac.git
-cd SMVac
+# Build and run the full test suite (11 tests: regression, unit, physics)
+cmake -S . -B build && cmake --build build
+ctest --test-dir build --output-on-failure
 
-# Compile the numerical solver used by the Python sweep scripts
-g++ -std=c++17 -O3 -fopenmp apps/solver_numerical.cpp -o apps/generate_phase_diagram.exe
+# Single point: both estimators with all diagnostics
+./build/benchmark_point 125.1 173.1
+
+# Reproduce the committed example dataset (~4 min on 12 cores)
+python scripts/run_phase_diagram.py --mode numerical \
+    --mt-min 155 --mt-max 185 --mh-min 112 --mh-max 138 --step 0.25 \
+    --output data/numerical_sm_region.csv
+
+# Regenerate all figures from the committed data
+python scripts/make_figures.py
 ```
-*(Note: The Python wrapper scripts explicitly expect the executable to be named `apps/generate_phase_diagram.exe`.)*
 
-### Quick smoke test
-Before launching the full sweep, verify the binary directly on a 10-point chunk:
-```bash
-./apps/generate_phase_diagram.exe --numerical 0 10    # writes data/data_numerical_chunk_0.csv
-./apps/generate_phase_diagram.exe --analytical 0 10   # writes results/analytical_data_chunk_0.csv
+The committed datasets (`data/`), figures (`figures/`), and reference
+tables (`reference/v1.1/`) are all regenerable from these commands; nothing
+depends on machine-specific state.
+
+## Repository layout
+
 ```
-If either exits non-zero or produces no CSV, do not start the full sweep.
+include/SMVacuumDecay/   library headers (RGE, potential, bounce, numerics)
+src/                     physics implementation
+apps/                    benchmark_point, generate_phase_diagram,
+                         write_reference_tables, dump_diagnostics,
+                         convergence_scan
+tests/unit/              algorithm and constant checks
+tests/physics/           analytic limits, convergence, literature comparison
+tests/regression/        frozen-value reproducibility tests
+docs/                    theory, numerical method, validation, limitations,
+                         references, audit notes, code provenance
+scripts/                 scan driver and figure generation (Python)
+data/                    committed example datasets (+ README)
+reference/v1.1/          frozen reference tables for the regression tests
+figures/                 committed figures (generated by scripts/)
+```
 
----
+## Documentation
 
-## Getting Started
+| document | content |
+|---|---|
+| [docs/theory.md](docs/theory.md) | physics problem, conventions, every equation, approximations |
+| [docs/numerical-method.md](docs/numerical-method.md) | equation → algorithm → implementation → output mapping |
+| [docs/validation.md](docs/validation.md) | what is validated, how, and with which numbers |
+| [docs/limitations.md](docs/limitations.md) | consolidated known limitations |
+| [docs/references.md](docs/references.md) | verified bibliography |
+| [docs/audit-notes.md](docs/audit-notes.md) | pre-reorganization audit findings and dispositions |
 
-Data generation is separated from visualization. To reproduce the phase diagram:
+## Known limitations (summary)
 
-1. **Compile the solver** as shown in the Installation section.
-2. **Run the parameter sweep** across the $(M_h, M_t)$ plane:
-   ```bash
-   python scripts/run_numerical.py
-   ```
-   *(This script distributes the workload across 12 processes. Generating the 1-million point grid will take several hours.)*
-3. **Generate the phase diagram** from the CSV output:
-   ```bash
-   python scripts/plot_numerical_contours.py
-   ```
+The full list with discussion is in
+[docs/limitations.md](docs/limitations.md). The most important:
 
----
-
-## Validation
-
-The numerical integration routines in this repository have been benchmarked against the strict analytical conformal limit $S_{\text{approx}} = 8\pi^2 / (3|\lambda_{\text{min}}|)$. 
-
-Extracted from the repository's `data/numerical_data.csv` output:
-- **Deep Metastability** ($M_h = 115.0, M_t = 180.0$): The RG-improved action deviates from the pure analytical approximation by only **-0.01%**, confirming that the conformal limit holds deep in the unstable regime.
-- **Near the Phase Boundary** ($M_h = 134.75, M_t = 176.50$): The RG-improved action deviates by **32.1%**, illustrating significant deviations from the constant-coupling approximation near the metastability boundary.
-
----
-
-## Results
-
-### Analytical vs RG-Improved Disagreement
-![Overlay Plot](figures/overlay.png)
-*This figure highlights the regions where the strict analytical approximation (conformal limit) misclassifies the vacuum state compared to the RG-improved calculation. The differences emerge primarily near the stability boundary where the running of the couplings cannot be ignored.*
-
-### Optimization Convergence
-![Convergence Plot](figures/convergence.png)
-*This diagnostic plot demonstrates the internal convergence behavior of the solver's minimization algorithms. (Note: specific diagnostic scripts under `src/` are used to generate these convergence traces).*
-
----
-
-## Current Limitations
-
-To maintain scientific transparency, the following limitations apply to the current implementation:
-- **No exact bounce PDE solver:** The repository does *not* integrate the true spatial equation of motion ($\phi'' + \frac{3}{r}\phi' = \frac{dV}{d\phi}$). It evaluates the Fubini-Lipatov ansatz using numerical integration of the effective potential.
-- **No adaptive RK4 for the bounce:** The RK4 solver is used strictly for the Renormalization Group Equations over the energy scale $\mu$, not the spatial coordinate $r$.
-- **Hardcoded parameters:** Python wrapper scripts currently hardcode thread counts (`NUM_PROCESSES = 12`), chunk sizes, and grid resolutions.
-- **No formal build system:** The project relies on manual `g++` compilation rather than Make or CMake.
-- **Limited automated testing:** While a basic GitHub Actions CI is present to check compilation, rigorous numerical tolerance enforcement tests are not yet fully automated.
-
----
-
-## Future Work
-
-Planned improvements to the repository include:
-- Investigation of full numerical bounce solutions through boundary-value methods (e.g., shooting or relaxation)
-- Integration of a robust CMake build system.
-- Addition of a formalized C++ testing framework (e.g., Catch2 or GoogleTest) to guarantee quadrature and integration tolerances.
-- Command-line argument parsing for Python grid generation scripts.
-
----
-
-## References
-
-1. Fubini, S. (1976). A new approach to conformal invariant field theories. *Nuovo Cimento A*, 34(3), 521-554.
-2. Lipatov, L. N. (1977). Divergence of the perturbation-theory series and the semiclassical theory. *Sov. Phys. JETP*, 45(2), 216-223.
-3. Buttazzo, D., Degrassi, G., Giardino, P. P., Giudice, G. F., Sala, F., Salvio, A., & Strumia, A. (2013). Investigating the near-criticality of the Higgs boson. *Journal of High Energy Physics*, 2013(12), 89.
-4. Andreassen, A., Frost, W., & Schwartz, M. D. (2018). Scale invariant instantons and the complete lifetime of the standard model. *Physical Review D*, 97(5), 056006.
-5. Degrassi, G., Di Vita, S., Elias-Miro, J., Espinosa, J. R., Giudice, G. F., Isidori, G., & Strumia, A. (2012). Higgs mass and vacuum stability in the Standard Model at NNLO. *Journal of High Energy Physics*, 2012(8), 98.
-
----
+* the conformal profile is a variational ansatz — no bounce-equation solve,
+  so actions are upper bounds and the decay rate is underestimated;
+* the high-field potential omits the tree-level mass term (false vacuum at
+  the origin, not the electroweak vacuum);
+* the Planck-suppressed $\phi^6$ regularization is hard-coded with
+  coefficient $c_6 = 1$ (no literature provenance established);
+* the decay-rate prefactor uses the $\lambda$ zero-crossing scale; its
+  radius dependence is neglected (cf. Andreassen, Frost & Schwartz 2018);
+* a 4-loop $g_3$ beta-function term with an untraceable coefficient
+  ($2472.28$) is retained as-is; measured impact $\sim 0.1\%$.
 
 ## Citation
 
-If you use SMVac in your research, please cite the repository using the provided `CITATION.cff` or as follows:
+If you use this code, please cite it via [CITATION.cff](CITATION.cff):
 
 ```bibtex
-@misc{smvac2026,
-  author = {Naman Goyal},
-  title = {SMVac: Precision Computation of Electroweak Vacuum Stability in the Standard Model},
-  year = {2026},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{https://github.com/namangoyal31/SMVac}},
-  doi = {[TODO: DOI]}
+@misc{goyal2026smvacresearch,
+  author       = {Naman Goyal},
+  title        = {SMVac-Research: Numerical Study of Standard Model
+                  Electroweak Vacuum Stability},
+  year         = {2026},
+  publisher    = {GitHub},
+  howpublished = {\url{https://github.com/namangoyal31/SMVac-Research}},
+  version      = {2.0.0}
 }
 ```
+
+## Provenance
+
+This repository is the upgraded research codebase; the original working
+repository (including bulk generated data and working analysis notes) is
+preserved unchanged at
+[namangoyal31/SMVac](https://github.com/namangoyal31/SMVac). The migration
+of every physics function is documented in
+[docs/CODE_PROVENANCE.md](docs/CODE_PROVENANCE.md), and the audit that
+preceded the reorganization in
+[docs/audit-notes.md](docs/audit-notes.md).
+
+## License
+
+[MIT](LICENSE) — Copyright (c) 2026 Naman Goyal.
