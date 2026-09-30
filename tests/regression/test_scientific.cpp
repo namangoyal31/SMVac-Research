@@ -40,8 +40,8 @@ int main() {
     // Expected values from reference/v1.1 (regenerated after the matching and
     // interpolation corrections; see docs/audit-notes.md and CHANGELOG.md)
     int expected_status = 2; // Metastable
-    double expected_fl_action = 2049.3258580936563;
-    double expected_num_action = 2101.3811617673691;
+    double expected_fl_action = 2051.1373669116429;
+    double expected_num_action = 2103.1046353416655;
 
     std::cout << "\nValidating Analytical solver..." << std::endl;
     assert_equal(fl_status, expected_status, "FL Status");

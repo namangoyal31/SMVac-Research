@@ -113,13 +113,13 @@ classified unstable); the `S_kinetic/S_potential` pair identifies them.
 From a fresh clone (see the README for prerequisites):
 
 ```bash
-cmake -S . -B build && cmake --build build        # or: make
+cmake -S . -B build && cmake --build build
 ./build/benchmark_point 125.1 173.1               # single point, both estimators
 python scripts/run_phase_diagram.py --mode numerical --mt-min 160 --mt-max 185 \
        --mh-min 110 --mh-max 140 --step 0.5       # SM-region scan
 python scripts/plot_phase_diagram.py results/numerical_data.csv \
        --output figures/phase_diagram.png         # visualize
-ctest --test-dir build                             # or: ./build/run_tests
+ctest --test-dir build
 ```
 
 The committed example dataset and the figures in `figures/` are produced by

@@ -62,8 +62,9 @@ StandardModelParameters get_nnlo_matching(double Mh, double Mt) {
     // linearized Mt-dependence from Buttazzo et al. (2013), eqs. (58)-(59).
     // g2 = 0.64779; the previous value 0.65355 could not be traced to the
     // cited NNLO references and overestimated g2(Mt) by ~0.9% (finding 16).
-    // g1 is GUT-normalized: g1 = sqrt(5/3) * g_Y with g_Y(Mt) = 0.35830.
-    double g1_Mt = 0.462458 + 0.000142 * (Mt - 173.34);
+    // g1 is GUT-normalized: g1 = sqrt(5/3) * g_Y with g_Y(Mt) = 0.35830,
+    // i.e. g1(Mt) = 0.462563; the previous value 0.46266 was untraceable.
+    double g1_Mt = 0.462563 + 0.000142 * (Mt - 173.34);
     double g2_Mt = 0.64779 + 0.00004 * (Mt - 173.34);
     double g3_Mt = 1.1666 + 0.00314 * dAlphas - 0.00046 * (Mt - 173.34);
     return {g1_Mt, g2_Mt, g3_Mt, yt_Mt, std::sqrt(2.0)*Mb/v, std::sqrt(2.0)*Mtau/v, lambda_Mt, 0};

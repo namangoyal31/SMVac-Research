@@ -12,13 +12,13 @@ int main() {
     // Standard Model Point
     double SM_Mh = 125.1;
     double SM_Mt = 173.1;
-    double SM_ref_FL = 2049.3258580936563;
+    double SM_ref_FL = 2051.1373669116429;
     int SM_ref_Status = 2;
 
     // Low-Mass Point (deeply metastable toy region of the scan range)
     double Low_Mh = 5.0;
     double Low_Mt = 105.0;
-    double Low_ref_FL = 10367.658906865872;
+    double Low_ref_FL = 10369.075472325036;
     int Low_ref_Status_FL = 2; // analytical gives 2, numerical gives 3 (documented)
 
     auto sm_res = SMVacuumDecay::classify_buttazzo(SM_Mh, SM_Mt);

@@ -16,7 +16,7 @@ using namespace SMVacuumDecay;
 int main() {
     double Low_Mh = 5.0;
     double Low_Mt = 105.0;
-    double Ref_Numerical_Action = -1526983.0191708419;
+    double Ref_Numerical_Action = -1526742.427981734;
 
     StandardModelParameters y = get_nnlo_matching(Low_Mh, Low_Mt);
 

@@ -1,17 +1,30 @@
 name: CI
+
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Compile solver
-        run: g++ -std=c++17 -O3 -fopenmp apps/solver_numerical.cpp -o apps/generate_phase_diagram.exe
-      - name: Smoke test numerical mode
-        run: ./apps/generate_phase_diagram.exe --numerical 0 10
-      - name: Smoke test analytical mode
-        run: ./apps/generate_phase_diagram.exe --analytical 0 10
+      - uses: actions/checkout@v4
+
+      - name: Configure and build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j 2
+
+      - name: Run full test suite (regression, unit, physics)
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Single-point benchmark smoke test
+        run: ./build/benchmark_point 125.1 173.1
+
+      - name: Scan smoke test (small grid)
+        run: |
+          mkdir -p results
+          ./build/generate_phase_diagram --numerical --mt-min 172 --mt-max 173 --mh-min 125 --mh-max 125.5 --step 0.5
+          head -5 results/numerical_chunk_0.csv

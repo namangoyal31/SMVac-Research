@@ -63,3 +63,5 @@ apps/*.out
 # Python
 __pycache__/
 *.pyc
+# CMake build directory
+build/

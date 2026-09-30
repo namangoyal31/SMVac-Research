@@ -3,6 +3,11 @@
 
 namespace SMVacuumDecay {
 
+// Production numerical settings (exposed so validation tests can vary them;
+// see docs/validation.md for the measured convergence).
+constexpr int kDefaultQuadraturePoints = 2048; // Simpson subintervals on u
+constexpr double kDefaultRgeStep = 0.1;        // RK4 step in t = ln(mu^2)
+
 // Decomposition of the ansatz action at fixed profile scale R.
 struct ActionEvaluation {
     double total;     // S = S_kinetic + S_potential
@@ -20,8 +25,12 @@ double get_pure_sm_lambda(RGEHelper& rge, double phi_dimless, double mu_inst);
 double integrand_u(RGEHelper& rge, double u, double R, double mu_inst, double prefactor);
 
 // Action of the Fubini-Lipatov profile of scale R (in units of 1/mu_inst).
-ActionEvaluation evaluate_action_components(RGEHelper& rge, double mu_inst, double R);
-double evaluate_action_at_R(RGEHelper& rge, double mu_inst, double R);
+// quad_points overrides the production quadrature setting (for convergence
+// tests).
+ActionEvaluation evaluate_action_components(RGEHelper& rge, double mu_inst, double R,
+                                            int quad_points = kDefaultQuadraturePoints);
+double evaluate_action_at_R(RGEHelper& rge, double mu_inst, double R,
+                            int quad_points = kDefaultQuadraturePoints);
 
 // Minimum of the action over R, found by golden-section search on
 // log(R) in a bracket around the naive conformal estimate. If R_opt_out is
@@ -43,6 +52,7 @@ struct StabilityResult {
     double Mh;         // Higgs mass input (echoed for convenience)
 };
 
-StabilityResult classify_stability(double Mh, double Mt);
+StabilityResult classify_stability(double Mh, double Mt,
+                                   double rge_step = kDefaultRgeStep);
 
 }

@@ -66,7 +66,8 @@ double integrand_u(RGEHelper& rge, double u, double R, double mu_inst, double pr
     return 2.0 * pi * pi * std::pow(R, 4) * e4x * V_x * jacobian;
 }
 
-ActionEvaluation evaluate_action_components(RGEHelper& rge, double mu_inst, double R) {
+ActionEvaluation evaluate_action_components(RGEHelper& rge, double mu_inst, double R,
+                                            int quad_points) {
     if (R <= 0.0) return {1e100, 1e100, 0.0};
     double mu_R = mu_inst / R;
     if (mu_R <= 0.0) return {1e100, 1e100, 0.0};
@@ -85,13 +86,14 @@ ActionEvaluation evaluate_action_components(RGEHelper& rge, double mu_inst, doub
     auto f = [&](double u) {
         return integrand_u(rge, u, R, mu_inst, prefactor);
     };
-    double potential_integral = numerics::simpson_integrate(-1.0, 1.0, kQuadraturePoints, f);
+    double potential_integral = numerics::simpson_integrate(-1.0, 1.0, quad_points, f);
 
     return {kinetic_term + potential_integral, kinetic_term, potential_integral};
 }
 
-double evaluate_action_at_R(RGEHelper& rge, double mu_inst, double R) {
-    return evaluate_action_components(rge, mu_inst, R).total;
+double evaluate_action_at_R(RGEHelper& rge, double mu_inst, double R,
+                            int quad_points) {
+    return evaluate_action_components(rge, mu_inst, R, quad_points).total;
 }
 
 double find_minimum_action(RGEHelper& rge, double mu_inst, double t_min_lambda, double* R_opt_out) {
@@ -116,7 +118,7 @@ double find_minimum_action(RGEHelper& rge, double mu_inst, double t_min_lambda, 
     return S_min;
 }
 
-StabilityResult classify_stability(double Mh, double Mt) {
+StabilityResult classify_stability(double Mh, double Mt, double rge_step) {
     StabilityResult out{};
     out.Mh = Mh;
     out.status = 0; out.S_exact = -1.0; out.S_approx = -1.0;
@@ -136,7 +138,7 @@ StabilityResult classify_stability(double Mh, double Mt) {
     double t_min_lambda = t0;
 
     double t = t0;
-    double dt = 0.1;
+    double dt = rge_step;
     rge.add_point(t, y);
 
     double t_v = 2 * std::log(v);
