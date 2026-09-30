@@ -8,18 +8,44 @@ effective potential — to investigate where the Standard Model vacuum is
 absolutely stable, metastable, or unstable in the $(M_h, M_t)$ plane, and to
 quantify when the strict conformal approximation is adequate.
 
-![Phase diagram of the Standard Model vacuum](figures/phase_diagram.png)
+![Full Standard Model vacuum phase diagram](figures/01_full_phase_diagram.png)
 
-*Stability of the SM vacuum in the Higgs–top mass plane. Blue: the
-RG-improved quartic coupling stays positive up to the Planck scale (absolute
-stability). White: the coupling turns negative but the estimated decay
-action exceeds the age-of-the-universe threshold (metastable). Red: the
-action falls below the threshold. Orange: points where the conformal ansatz
-breaks down (non-positive action) adjacent to the stability boundary — a
-documented artifact of the method, not a physical instability. Contours:
-optimized ansatz action $S$. The star marks the benchmark point
-$(125.1, 173.1)$ GeV; the ellipses show the PDG 2022 $1\sigma$/$2\sigma$
-region.*
+*Stability of the SM vacuum across the full $(M_h, M_t)$ plane (RG-improved
+Fubini–Lipatov estimator, 1 GeV resolution). **Green:** the RG-improved
+quartic coupling stays positive up to the Planck scale (absolute stability).
+**Yellow:** the coupling turns negative but the estimated decay action
+exceeds the age-of-the-universe threshold (metastable). **Red:** the action
+falls below the threshold (unstable). **Black:** the RGEs themselves leave
+their perturbative range. The star marks the experimental point
+$(125.1, 173.1)$ GeV, which lies in the metastable region near the
+stability boundary; black dots along that boundary are the documented
+ansatz-breakdown artifact, not physical instabilities. Grey contours:
+constant RG-improved action. The phenomenological window is resolved at
+0.25 GeV in the figures below.*
+
+![Phenomenological zoom](figures/02_phenomenological_zoom.png)
+
+*The phenomenologically relevant window at 0.25 GeV resolution with the
+PDG 2022 $1\sigma$/$2\sigma$ region and constant-action contours.*
+
+![Conformal vs RG-improved classification](figures/05_conformal_vs_rg_difference.png)
+
+*Classification difference map: where the strict conformal estimate and the
+RG-improved evaluation disagree over the full plane. Differences
+concentrate along the classification boundaries — this is a comparison of
+two approximations, not a correctness statement (see
+[docs/figures.md](docs/figures.md)).*
+
+![Fractional action difference](figures/06_action_fractional_difference.png)
+
+*Fractional difference $(S_{\rm exact}-S_{\rm approx})/S_{\rm approx}$ over
+the metastable region: the RG improvement changes the action by ≈30% near
+the stability boundary and is negligible deep in the metastable region.*
+
+The complete figure set — including the action-contour map, the
+validity/breakdown map, the $S(R)$ decomposition, the RG-running panels,
+and the numerical-convergence figure — is collected with full captions in
+[docs/figures.md](docs/figures.md).
 
 ## What the code computes
 
@@ -61,24 +87,6 @@ region inherit the ansatz systematics. All approximations are documented in
   and is negligible deep in the metastable region: the fractional difference
   from the strict conformal estimate grows from $\sim 0$ at
   $(115, 180)$ GeV to $\sim +30\%$ at $(134.75, 176.5)$ GeV.
-
-![Running of the effective quartic coupling](figures/lambda_running.png)
-
-*$\lambda_{\rm eff}(\mu)$ for an unstable, the physical, and a near-boundary
-point. The zero crossing and its depth control the decay action.*
-
-![Action decomposition](figures/action_curve.png)
-
-*The ansatz action $S(R)$ at the benchmark point with its closed-form
-kinetic part and numerically integrated potential part; the golden-section
-minimum defines $S_\ast$. In the pure-quartic limit
-$S_{\rm kin}/|S_{\rm pot}| = 2$.*
-
-![Fractional error map](figures/error_map.png)
-
-*Fractional difference between the RG-improved and the strict conformal
-action over the metastable region. The conformal approximation fails
-precisely where the metastability classification is most sensitive.*
 
 ## Quick start
 
@@ -179,6 +187,7 @@ of every physics function is documented in
 preceded the reorganization in
 [docs/audit-notes.md](docs/audit-notes.md).
 
-## License
+## Authorship and copyright
 
-[MIT](LICENSE) — Copyright (c) 2026 Naman Goyal.
+Copyright © 2026 Naman Goyal. All rights reserved — see [NOTICE](NOTICE).
+No open-source license is granted with this repository.
