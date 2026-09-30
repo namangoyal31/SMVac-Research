@@ -46,6 +46,7 @@ def run_chunk(binary, args, start, end, chunk_dir):
         "--start", str(start),
         "--end", str(end),
         "--output-dir", chunk_dir,
+        "--precision", str(args.precision),
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
@@ -72,6 +73,8 @@ def main():
                         help="path to the compiled generate_phase_diagram binary")
     parser.add_argument("--output", default=None,
                         help="aggregated output CSV (default: results/<mode>_data.csv)")
+    parser.add_argument("--precision", type=int, default=12,
+                        help="significant digits in the CSV output")
     parser.add_argument("--results-dir", default="results")
     parser.add_argument("--keep-chunks", action="store_true")
     args = parser.parse_args()

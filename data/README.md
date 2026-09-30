@@ -21,6 +21,27 @@ Columns: `Mt, Mh_calc, Stability, S_exact, S_approx, S_kinetic,
 S_potential, S_threshold, mu_inst, lambda_min` (schema in
 [../docs/numerical-method.md](../docs/numerical-method.md)).
 
+## `numerical_full_plane.csv` (63,001 rows)
+
+RG-improved classification over the full overview plane
+`Mt, Mh in [0, 250] GeV` at **1 GeV resolution**:
+
+```bash
+python scripts/run_phase_diagram.py --mode numerical     --mt-min 0 --mt-max 250 --mh-min 0 --mh-max 250 --step 1.0     --precision 8 --output data/numerical_full_plane.csv
+```
+
+(~10 min on 12 cores.) The 1 GeV resolution is a documented choice for the
+global overview figure (features of interest are several GeV wide); the
+original 0.25 GeV full-plane scan is 1,002,001 points and several hours —
+the same command with `--step 0.25` reproduces it. The phenomenological
+window is committed at 0.25 GeV in `numerical_sm_region.csv`.
+
+## `analytical_full_plane.csv` (63,001 rows)
+
+Strict conformal classification on the identical full-plane grid (same
+command with `--mode analytical`). Used by the classification difference
+map (figure 05).
+
 ## `analytical_sm_region.csv` (38,801 rows)
 
 Strict conformal estimator over the wider window

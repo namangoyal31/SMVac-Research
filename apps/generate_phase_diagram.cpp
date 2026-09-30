@@ -33,6 +33,7 @@ struct ScanConfig {
     size_t start_idx = 0;
     size_t end_idx = 0;      // 0 -> full range
     std::string output_dir = "results";
+    int precision = 12;      // significant digits for CSV output
 };
 
 double parse_arg(const char* name, char* value) {
@@ -66,6 +67,7 @@ ScanConfig parse_args(int argc, char* argv[]) {
         else if (arg == "--start") cfg.start_idx = static_cast<size_t>(parse_arg(arg.c_str(), next_value()));
         else if (arg == "--end") cfg.end_idx = static_cast<size_t>(parse_arg(arg.c_str(), next_value()));
         else if (arg == "--output-dir") cfg.output_dir = next_value();
+        else if (arg == "--precision") cfg.precision = static_cast<int>(parse_arg(arg.c_str(), next_value()));
         else {
             std::cerr << "Unknown argument: " << arg << std::endl;
             std::exit(1);
@@ -107,9 +109,10 @@ int main(int argc, char* argv[]) {
                   << std::endl;
         return 1;
     }
-    // Enough significant digits that the CSV round-trip does not degrade the
-    // pipeline's own convergence level (~1e-6 relative).
-    file << std::setprecision(12);
+    // Significant digits for the CSV round-trip; the default preserves the
+    // pipeline's own convergence level (~1e-6 relative). Overview scans over
+    // wide grids may lower it to bound file size (documented in data/README).
+    file << std::setprecision(cfg.precision);
 
     if (cfg.use_analytical) {
         file << "Mt,Mh_calc,Stability,S_approx\n";
