@@ -36,19 +36,20 @@ int main(int argc, char* argv[]) {
 
     std::cout << std::setprecision(12);
 
-    // --- RG trajectory with lambda_eff ---
+    // --- RG trajectory with lambda_eff and all running couplings ---
     {
         std::ofstream out(out_dir + "/trajectory.csv");
         if (!out.is_open()) { std::cerr << "cannot open trajectory.csv" << std::endl; return 1; }
         out << std::setprecision(12);
-        out << "scale_mu,lambda_raw,lambda_eff\n";
+        out << "scale_mu,g1,g2,g3,yt,lambda_raw,lambda_eff\n";
         StandardModelParameters y = get_nnlo_matching(Mh, Mt);
         double t = 2.0 * std::log(Mt);
         double tPlanck = 2.0 * std::log(planck_mass);
         double dt = 0.1;
         auto emit = [&](double t, const StandardModelParameters& p) {
             double mu = std::exp(t / 2.0);
-            out << mu << "," << p.lambda << "," << get_lambda_eff(p) << "\n";
+            out << mu << "," << p.g1 << "," << p.g2 << "," << p.g3 << ","
+                << p.yt << "," << p.lambda << "," << get_lambda_eff(p) << "\n";
         };
         emit(t, y);
         while (t < tPlanck) {
@@ -94,7 +95,22 @@ int main(int argc, char* argv[]) {
             }
         }
         double R_opt = -1.0;
-        find_minimum_action(rge, mu1, t_min, &R_opt);
+        double S_star = find_minimum_action(rge, mu1, t_min, &R_opt);
+
+        // Scalar diagnostics for figure annotations.
+        {
+            std::ofstream out(out_dir + "/meta.csv");
+            if (!out.is_open()) { std::cerr << "cannot open meta.csv" << std::endl; return 1; }
+            out << std::setprecision(12);
+            out << "key,value\n";
+            out << "Mh," << Mh << "\n";
+            out << "Mt," << Mt << "\n";
+            out << "mu1," << mu1 << "\n";
+            out << "R_opt," << R_opt << "\n";
+            out << "S_star," << S_star << "\n";
+            out << "S_threshold," << res.S_threshold << "\n";
+            out << "lambda_min," << res.lambda_min << "\n";
+        }
 
         std::ofstream out(out_dir + "/action_curve.csv");
         if (!out.is_open()) { std::cerr << "cannot open action_curve.csv" << std::endl; return 1; }

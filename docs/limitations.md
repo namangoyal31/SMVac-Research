@@ -104,16 +104,24 @@ stability boundary.
     to the $\lambda_{\min} = 0$ boundary, isolated grid points yield
     **non-positive ansatz actions** (the profile amplitude
     $\sqrt{2/|\lambda_R|}$ diverges as $\lambda_R \to 0^-$ while the
-    potential integral uses $\lambda_{\rm eff} \neq \lambda_R$). About 2.7%
-    of the "unstable" points in the committed numerical scan (62 of 2,324)
-    have $S \le 0$; they form a one-grid-cell strip along the stability
-    boundary and are drawn as a separate category in the phase diagram.
-    They are an artifact of the method, not physical instabilities. The
-    kinetic-shortcut approximation (action replaced by the kinetic term
-    when $|\lambda_R| \lesssim 3.3\times10^{-4}$) also overestimates such
-    actions by up to a factor $\sim 2$ — irrelevant for the classification
-    since those actions exceed the threshold by orders of magnitude either
-    way.
+    potential integral uses $\lambda_{\rm eff} \neq \lambda_R$). In the
+    committed 0.25 GeV SM-window scan, 62 of 2,324 "unstable" points
+    (2.7%) have $S \le 0$ (full plane: 518); they form a one-grid-cell
+    strip along the stability boundary and are drawn as a separate
+    category in the phase diagram. They are an artifact of the method, not
+    physical instabilities. Two further artifact classes exist near the
+    boundary and are flagged rather than hidden: **kinetic-shortcut
+    points** (61 in the SM window, 98 in the full plane), where the action
+    is returned without the potential integral and is only a rough
+    overestimate, and **fence points** (11 in the SM window and full
+    plane), where no radius in the search bracket gives
+    $\lambda_R < 0$, so the "action" is the $10^{100}$ sentinel rather
+    than a calculation (the classification as metastable is still correct —
+    the true action is large). All three classes are exported in the CSV
+    columns and drawn explicitly in figures 02, 04 and 07. The
+    kinetic-shortcut approximation also overestimates such actions by up
+    to a factor $\sim 2$ — irrelevant for the classification since those
+    actions exceed the threshold by orders of magnitude either way.
 
 13. **Interpolation of the RG table.** Couplings are linearly interpolated
     between table points ($\Delta t = 0.1$); the associated error is
