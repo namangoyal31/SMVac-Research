@@ -65,7 +65,7 @@ reporting the strict conformal action $8\pi^2/(3|\lambda_{\min}|)$.
 | Setting | Value | Where | Validation |
 |---|---|---|---|
 | RK4 step $\Delta t$ (in $t = \ln\mu^2$) | 0.1 | `classify_stability`, `classify_buttazzo` | step-halving study: $\lambda_{\min}$ and $S_\ast$ converge to $\le 10^{-6}$ relative; see `tests/physics/test_convergence.cpp` |
-| Quadrature points $N$ (Simpson, on $u \in (-1,1)$) | 2048 | `kQuadraturePoints` | convergence $\sim N^{-4}$ verified on the production integrand; the integrable $u \to -1$ edge singularity is benign at this $N$ |
+| Quadrature points $N$ (Simpson, on $u \in (-1,1)$) | 2048 | `kDefaultQuadraturePoints` | at the $\sim 10^{-9}$ relative round-off floor for all $N$ tested (order $\sim N^{-4}$ verified on smooth integrands in `tests/unit/test_numerics.cpp`); the integrable $u \to -1$ edge singularity is validated against the analytic conformal limit to $\le 2\times10^{-12}$ |
 | Golden-section tolerance on $\ln R$ | $10^{-13}$ | `kLogRadiusTolerance` | minimization error far below machine-relevant level; bracket $[\ln R_{\rm opt} \pm 8]$ |
 | Interpolation of the RG table | linear in $t$ | `RGEHelper::get_params` | error bounded by the table step; covered by the $\Delta t$ study |
 | Running range | $\mu \in [M_t, M_{\rm Pl}]$ (production), extended to $[1\ \mathrm{GeV}, M_{\rm Pl}]$ in reference tables | — | couplings frozen at the range edges |
@@ -117,7 +117,7 @@ cmake -S . -B build && cmake --build build
 ./build/benchmark_point 125.1 173.1               # single point, both estimators
 python scripts/run_phase_diagram.py --mode numerical --mt-min 160 --mt-max 185 \
        --mh-min 110 --mh-max 140 --step 0.5       # SM-region scan
-python scripts/plot_phase_diagram.py results/numerical_data.csv \
+python scripts/plot_phase_diagram.py data/numerical_sm_region.csv \
        --output figures/phase_diagram.png         # visualize
 ctest --test-dir build
 ```

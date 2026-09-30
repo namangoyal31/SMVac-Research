@@ -62,7 +62,7 @@ a full audit (see `docs/audit-notes.md`).
   `--analytical` mode computed numerical results under an analytical
   filename.
 - Dead code (`V1_loop`, the unused adaptive RK4 stepper, unused constants).
-- Untraceable-name constant `CLAUDE_M_PLANCK` (renamed `planck_mass`).
+- Legacy constant naming cleaned up (`planck_mass`; see docs/audit-notes.md).
 
 ## [1.0.0] - 2026-07-01 (original SMVac repository)
 
