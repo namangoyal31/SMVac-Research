@@ -37,10 +37,10 @@ def main():
     args = parser.parse_args()
 
     apply_style()
-    df = pd.read_csv("data/numerical_sm_region.csv")
+    df = pd.read_csv("data/numerical_zoom_0p1GeV.csv")
     sel = ((df["Mt"] >= ZOOM_REGION["mt"][0]) & (df["Mt"] <= ZOOM_REGION["mt"][1]) &
            (df["Mh_calc"] >= ZOOM_REGION["mh"][0]) & (df["Mh_calc"] <= ZOOM_REGION["mh"][1]))
-    mts, mhs, g = regular_grid(df[sel], ["S_exact", "S_approx", "Stability"])
+    mts, mhs, g = regular_grid(df[sel], ["S_exact", "S_approx", "Stability", "lambda_min"])
 
     valid = (g["S_exact"] > 0) & (g["S_approx"] > 0)
     Z = np.where(valid, (g["S_exact"] - g["S_approx"]) / g["S_approx"], np.nan)
@@ -52,11 +52,11 @@ def main():
     cbar = fig.colorbar(mesh, ax=ax, pad=0.02)
     cbar.set_label(r"$(S_{\rm exact} - S_{\rm approx}) / S_{\rm approx}$")
 
-    # Absolute-stability boundary for context (blank region below it).
-    status = g["Stability"]
-    if (status == 1).any():
-        ax.contour(mhs, mts, (status == 1).astype(float), levels=[0.5],
-                   colors="black", linewidths=1.2)
+    # Absolute-stability boundary as the lambda_min = 0 level set of the
+    # computed field (visualization-only interpolation between grid points).
+    lam = np.where(g["Stability"] != 4, g["lambda_min"], np.nan)
+    if np.isfinite(lam).any() and (lam > 0).any() and (lam < 0).any():
+        ax.contour(mhs, mts, lam, levels=[0.0], colors="black", linewidths=1.2)
         ax.plot([], [], color="black", lw=1.2,
                 label=r"$\lambda_{\min} = 0$ (absolutely stable)")
         ax.legend(frameon=False, fontsize=8, loc="upper left")

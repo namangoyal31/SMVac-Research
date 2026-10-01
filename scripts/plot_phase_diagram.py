@@ -15,9 +15,9 @@ instabilities (docs/limitations.md, item 12).
 
 Regions:
     --region full : the whole scanned plane 0-250 GeV x 0-250 GeV
-                    (data/numerical_full_plane.csv, 1 GeV resolution)
+                    (data/numerical_full_plane_0p5GeV.csv, 1 GeV resolution)
     --region zoom : the phenomenological window Mh 112-138, Mt 155-185 GeV
-                    (data/numerical_sm_region.csv, 0.25 GeV resolution)
+                    (data/numerical_zoom_0p1GeV.csv, 0.25 GeV resolution)
 """
 
 import argparse
@@ -76,11 +76,19 @@ def classification_map(ax, mts, mhs, g, contour_levels, ellipses, mt_step):
                         linewidths=0.6, alpha=0.65)
         ax.clabel(cs, fmt=lambda v: f"S={v:.0f}", fontsize=6.5, inline=True)
 
-    # Boundary of the genuine (non-artifact) unstable region.
-    unb = np.where((g["Stability"] == 3) & (g["S_exact"] > 0), 1.0, 0.0)
-    if 0 < unb.sum() < unb.size:
-        ax.contour(mhs, mts, unb, levels=[0.5], colors="k",
-                   linewidths=0.9, linestyles="dashed")
+    # Stability boundaries as level sets of the per-point computed fields
+    # (the calculation itself exists only at the grid points; the contour
+    # interpolation is purely visual):
+    #   absolute stability:  lambda_min = 0   (solid)
+    #   metastability:       S_exact = S_threshold, where defined (dashed)
+    lam = np.where(g["Stability"] != 4, g["lambda_min"], np.nan)
+    if np.isfinite(lam).any() and (lam > 0).any() and (lam < 0).any():
+        ax.contour(mhs, mts, lam, levels=[0.0], colors="k", linewidths=1.4)
+    dS = np.where(np.isin(g["Stability"], [2, 3]) & (g["S_exact"] > 0),
+                  g["S_exact"] - g["S_threshold"], np.nan)
+    if np.isfinite(dS).any() and (dS > 0).any() and (dS < 0).any():
+        ax.contour(mhs, mts, dS, levels=[0.0], colors="k", linewidths=0.9,
+                   linestyles="dashed")
 
     # Ansatz-breakdown points (unstable with S <= 0): black dots.
     bd = (g["Stability"] == 3) & (g["S_exact"] <= 0)
@@ -108,6 +116,8 @@ def classification_map(ax, mts, mhs, g, contour_levels, ellipses, mt_step):
 
     handles = [Patch(facecolor=STATUS_COLORS[s], label=STATUS_LABELS[s])
                for s in (1, 2, 3, 4)]
+    handles.append(Line2D([], [], color="black", lw=1.4,
+                          label=r"stability boundary ($\lambda_{\min}=0$)"))
     if bd.any():
         handles.append(Line2D([], [], linestyle="none", marker="o", markersize=4,
                               markerfacecolor="black", markeredgecolor="black",
@@ -131,8 +141,8 @@ def main():
 
     apply_style()
     if args.region == "full":
-        df = pd.read_csv("data/numerical_full_plane.csv")
-        mts, mhs, g = regular_grid(df, ["Stability", "S_exact"])
+        df = pd.read_csv("data/numerical_full_plane_0p5GeV.csv")
+        mts, mhs, g = regular_grid(df, ["Stability", "S_exact", "lambda_min", "S_threshold"])
         mt_step = mts[1] - mts[0]
         output = args.output or "figures/01_full_phase_diagram.png"
         levels = [450, 600, 800, 1200, 2000, 4000, 10000]
@@ -140,13 +150,13 @@ def main():
         classification_map(ax, mts, mhs, g, levels, ellipses=False,
                            mt_step=mt_step)
     else:
-        df = pd.read_csv("data/numerical_sm_region.csv")
+        df = pd.read_csv("data/numerical_zoom_0p1GeV.csv")
         sel = ((df["Mt"] >= ZOOM_REGION["mt"][0]) & (df["Mt"] <= ZOOM_REGION["mt"][1]) &
                (df["Mh_calc"] >= ZOOM_REGION["mh"][0]) & (df["Mh_calc"] <= ZOOM_REGION["mh"][1]))
-        mts, mhs, g = regular_grid(df[sel], ["Stability", "S_exact"])
+        mts, mhs, g = regular_grid(df[sel], ["Stability", "S_exact", "lambda_min", "S_threshold"])
         mt_step = mts[1] - mts[0]
         output = args.output or "figures/02_phenomenological_zoom.png"
-        levels = [450, 600, 800, 1200, 2000, 4000, 8000, 16000, 32000]
+        levels = [450, 600, 800, 1200, 2000, 4000, 10000, 30000]
         fig, ax = plt.subplots(figsize=(7.0, 5.6))
         classification_map(ax, mts, mhs, g, levels, ellipses=True,
                            mt_step=mt_step)

@@ -33,7 +33,7 @@ def main():
     args = parser.parse_args()
 
     apply_style()
-    df = pd.read_csv("data/numerical_sm_region.csv")
+    df = pd.read_csv("data/numerical_zoom_0p1GeV.csv")
     sel = ((df["Mt"] >= ZOOM_REGION["mt"][0]) & (df["Mt"] <= ZOOM_REGION["mt"][1]) &
            (df["Mh_calc"] >= ZOOM_REGION["mh"][0]) & (df["Mh_calc"] <= ZOOM_REGION["mh"][1]))
     mts, mhs, g = regular_grid(df[sel], ["S_exact", "Stability"])

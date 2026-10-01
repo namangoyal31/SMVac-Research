@@ -64,6 +64,33 @@ a full audit (see `docs/audit-notes.md`).
 - Dead code (`V1_loop`, the unused adaptive RK4 stepper, unused constants).
 - Legacy constant naming cleaned up (`planck_mass`; see docs/audit-notes.md).
 
+## [2.1.0] - 2026-09-30
+
+### Changed
+- Phase-diagram resolution increased, with **all datasets actually
+  recomputed** (no interpolation): full plane 1.0 -> **0.5 GeV**
+  (251,001 points, ~28 min), phenomenological zoom 0.25 -> **0.1 GeV**
+  (78,561 points, ~12 min), and a new dedicated boundary strip at
+  **0.05 GeV** (`Mh ∈ [110, 140] × Mt ∈ [162, 182]`, 241,001 points,
+  ~62 min). Datasets renamed to carry their resolution
+  (`*_full_plane_0p5GeV.csv`, `*_zoom_0p1GeV.csv`,
+  `*_boundary_0p05GeV.csv`); the coarse grids are kept as
+  resolution-convergence references.
+- Stability boundaries in the figures are now drawn as level sets of the
+  per-point computed fields (`λ_min = 0`; `S = S_threshold`) instead of
+  pixel edges of the classification; the interpolation between grid
+  points is documented as purely visual.
+- All derived figures (01-07) regenerated from the new-resolution data; a
+  new figure 11 shows the breakdown and classification-difference strips
+  at 0.05 GeV (both ~1 grid cell wide, ≲ 0.1 GeV).
+
+### Added
+- `scripts/check_resolution_convergence.py`: quantifies reproducibility
+  (bit-identical common points), boundary-location convergence (the
+  `λ_min = 0` crossing at Mt = 173 GeV is 128.965 GeV at every
+  resolution), classification area fractions, disagreement fractions, and
+  breakdown-count scaling. Documented in `docs/validation.md` §6.
+
 ## [2.0.1] - 2026-09-30
 
 ### Fixed

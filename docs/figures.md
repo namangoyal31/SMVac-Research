@@ -6,6 +6,18 @@ committed datasets in `data/` (see `data/README.md` for their provenance
 and resolution); diagnostics panels are produced on the fly by
 `build/dump_diagnostics` and `build/convergence_scan`.
 
+**Sampling resolution (no visual interpolation is presented as extra
+calculation).** Every classification pixel corresponds to an actually
+evaluated grid point of the pipeline; the production datasets are the full
+plane at **0.5 GeV** (501 x 501), the phenomenological zoom at **0.1 GeV**
+(261 x 301), and a boundary strip at **0.05 GeV** (601 x 401). Coarser
+grids (1.0 GeV full plane, 0.25 GeV zoom) are kept as resolution-convergence
+references; see `data/README.md` and
+`scripts/check_resolution_convergence.py`. Where a contour line is drawn
+through the sampled fields (e.g. the lambda_min = 0 stability boundary),
+the interpolation between grid points is purely visual and is noted in the
+caption.
+
 **Colour convention for categorical phase information** (as in the original
 SMVac plots): green = stable, yellow = metastable, red = unstable,
 black = non-perturbative / outside the range of validity. Continuous
@@ -28,8 +40,9 @@ the **assumed** coefficient `c₆ = 1`. See `docs/theory.md` and
 ## 01_full_phase_diagram.png
 
 **What:** classification of the SM vacuum over the full scanned plane
-`Mh, Mt ∈ [0, 250] GeV` at 1 GeV resolution (63,001 points; RG-improved
-estimator; dataset `data/numerical_full_plane.csv`).
+`Mh, Mt ∈ [0, 250] GeV` evaluated on a **0.5 GeV grid** (501 x 501 =
+251,001 points; RG-improved estimator; dataset
+`data/numerical_full_plane_0p5GeV.csv`).
 
 **Axes:** horizontal `Mh`, vertical `Mt`, both in GeV. **Colours:** green =
 absolutely stable (`λ_eff(μ)` never negative up to the Planck scale);
@@ -56,10 +69,10 @@ real SM; the breakdown dots mark where the ansatz, not the physics, fails.
 
 ## 02_phenomenological_zoom.png
 
-**What:** the same classification at 0.25 GeV resolution over the
+**What:** the same classification evaluated on a **0.1 GeV grid** over the
 phenomenologically relevant window `Mh ∈ [112, 138] GeV`,
-`Mt ∈ [155, 185] GeV` (RG-improved estimator;
-`data/numerical_sm_region.csv`), with PDG 2022 1σ/2σ ellipses around the
+`Mt ∈ [155, 185] GeV` (261 x 301 = 78,561 points; RG-improved estimator;
+`data/numerical_zoom_0p1GeV.csv`), with PDG 2022 1σ/2σ ellipses around the
 experimental central values (125.20 ± 0.11, 172.57 ± 0.29) GeV.
 
 **Physics story:** the experimental region sits inside the metastable band,
@@ -68,9 +81,9 @@ contours show how steeply the action falls toward instability.
 
 ## 03_experimental_point.png
 
-**What:** focused view of the benchmark point and its relation to the
-calculated stability structure, with quantitative annotations read from the
-pipeline output: `S* = 2103.1` vs threshold `S_th = 483.3` (metastable),
+**What:** focused view of the benchmark point, evaluated on the **0.05 GeV
+boundary dataset** (`data/numerical_boundary_0p05GeV.csv`), with
+quantitative annotations read from the pipeline output: `S* = 2103.1` vs threshold `S_th = 483.3` (metastable),
 zero-crossing scale `μ₁ = 6.2×10¹⁰ GeV`, and the grid-level distance to
 absolute stability in `Mh`. Ellipses as in figure 02.
 
@@ -94,7 +107,7 @@ boundary, which is why the classification is most sensitive there.
 ## 05_conformal_vs_rg_difference.png
 
 **What:** classification **difference map** over the full plane: for every
-1-GeV grid point, the classification from the strict conformal estimate
+0.5-GeV grid point, the classification from the strict conformal estimate
 `S_approx = 8π²/(3|λ_min|)` (constant-coupling limit) is compared with the
 RG-improved classification. Grey background: the two agree. Blue: the
 RG-improved evaluation classifies the point **more stable** than the
@@ -113,8 +126,9 @@ The full-plane version of the original SMVac "overlay" figure.
 ## 06_action_fractional_difference.png
 
 **What:** heatmap of the relative difference
-`(S_exact − S_approx)/S_approx` over the phenomenological window (diverging
-red–blue scale; defined only where both actions exist). Answers: *where
+`(S_exact − S_approx)/S_approx` over the phenomenological window at 0.1 GeV
+sampling (diverging red–blue scale; defined only where both actions
+exist). Answers: *where
 does RG improvement materially change the action?* Near the
 absolute-stability boundary the correction reaches ≈ +30%; deep in the
 metastable region it vanishes (the conformal limit is recovered to ~10⁻³).
@@ -124,8 +138,8 @@ see `docs/validation.md` §3 for the measured values at specific points.
 
 ## 07_ansatz_breakdown.png
 
-**What:** where the calculation is reliable over the full plane (computed
-from the committed dataset; no point discarded):
+**What:** where the calculation is reliable over the full plane at 0.5 GeV
+sampling (computed from the committed dataset; no point discarded):
 
 - white: absolutely stable — no action is computed (none is needed);
 - light grey: a genuine ansatz action is available (`0 < S < 4.9×10⁵`);
@@ -176,3 +190,18 @@ action is converged to the ~10⁻⁹ relative round-off floor by `N ≈ 256`;
 production uses `N = 2048`; the dashed line is the O(N⁻⁴) Simpson guide.
 Generated from the production code path by `build/convergence_scan`
 (`tests/physics/test_convergence.cpp` enforces the same settings).
+
+## 11_boundary_strip_0p05GeV.png
+
+**What:** the narrow structures along the stability boundary, resolved on
+the **0.05 GeV boundary strip** (`Mh ∈ [110, 140]`, `Mt ∈ [162, 182] GeV`;
+241,001 points, both estimators). Over the classification fills, brown
+dots mark ansatz-breakdown points (`S ≤ 0`) and blue squares mark points
+where the strict conformal and RG-improved classifications differ; the
+solid line is the `λ_min = 0` level set.
+
+**Physics story:** at 0.05 GeV sampling both strips are one to two grid
+cells wide — physically ≲ 0.1 GeV. The breakdown strip is a feature of
+the fixed-profile ansatz (its amplitude diverges as `λ_R → 0⁻`), and the
+disagreement strip is where the two actions straddle the metastability
+threshold; neither is an extended physical region.

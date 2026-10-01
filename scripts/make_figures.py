@@ -15,8 +15,9 @@ Figures (written to figures/, documented in docs/figures.md):
     08_action_vs_R                   S(R) decomposition at the SM point
     09_rg_running                    RG running of the couplings
     10_numerical_convergence         dt and N convergence of the pipeline
+    11_boundary_strip                breakdown + difference strips at 0.05 GeV
 
-Datasets: data/numerical_full_plane.csv and data/numerical_sm_region.csv
+Datasets: data/numerical_full_plane_0p5GeV.csv and data/numerical_zoom_0p1GeV.csv
 (committed; see data/README.md). Diagnostics (trajectories, action curves,
 convergence traces) are generated on the fly by build/dump_diagnostics and
 build/convergence_scan and cached under results/ (gitignored).
@@ -37,6 +38,7 @@ STEPS = [
     ("08_action_vs_R", [sys.executable, "scripts/plot_action_curve.py"]),
     ("09_rg_running", [sys.executable, "scripts/plot_running.py"]),
     ("10_numerical_convergence", [sys.executable, "scripts/plot_convergence.py"]),
+    ("11_boundary_strip", [sys.executable, "scripts/plot_boundary_strip.py"]),
 ]
 
 

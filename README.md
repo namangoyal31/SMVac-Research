@@ -101,10 +101,17 @@ ctest --test-dir build --output-on-failure
 # Single point: both estimators with all diagnostics
 ./build/benchmark_point 125.1 173.1
 
-# Reproduce the committed example dataset (~4 min on 12 cores)
+# Regenerate a production dataset (every grid point actually evaluated;
+# no interpolation is used anywhere)
 python scripts/run_phase_diagram.py --mode numerical \
-    --mt-min 155 --mt-max 185 --mh-min 112 --mh-max 138 --step 0.25 \
-    --output data/numerical_sm_region.csv
+    --mt-min 0 --mt-max 250 --mh-min 0 --mh-max 250 --step 0.5 \
+    --precision 8 --output data/numerical_full_plane_0p5GeV.csv   # ~35 min on 12 cores
+python scripts/run_phase_diagram.py --mode numerical \
+    --mt-min 155 --mt-max 185 --mh-min 112 --mh-max 138 --step 0.1 \
+    --precision 8 --output data/numerical_zoom_0p1GeV.csv         # ~20 min on 12 cores
+
+# Resolution-convergence check across all committed datasets
+python scripts/check_resolution_convergence.py
 
 # Regenerate all figures from the committed data
 python scripts/make_figures.py

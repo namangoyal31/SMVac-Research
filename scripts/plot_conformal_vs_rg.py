@@ -40,8 +40,8 @@ def main():
     args = parser.parse_args()
 
     apply_style()
-    num = pd.read_csv("data/numerical_full_plane.csv")
-    ana = pd.read_csv("data/analytical_full_plane.csv")
+    num = pd.read_csv("data/numerical_full_plane_0p5GeV.csv")
+    ana = pd.read_csv("data/analytical_full_plane_0p5GeV.csv")
 
     key = ["Mt", "Mh_calc"]
     merged = num[key + ["Stability", "S_exact"]].merge(

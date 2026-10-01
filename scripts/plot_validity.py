@@ -47,7 +47,7 @@ def main():
     args = parser.parse_args()
 
     apply_style()
-    df = pd.read_csv("data/numerical_full_plane.csv")
+    df = pd.read_csv("data/numerical_full_plane_0p5GeV.csv")
     mts, mhs, g = regular_grid(df, ["Stability", "S_exact", "S_kinetic"])
 
     status = g["Stability"]

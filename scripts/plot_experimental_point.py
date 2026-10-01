@@ -37,10 +37,10 @@ def main():
     args = parser.parse_args()
 
     apply_style()
-    df = pd.read_csv("data/numerical_sm_region.csv")
+    df = pd.read_csv("data/numerical_boundary_0p05GeV.csv")
     sel = ((df["Mt"] >= WINDOW["mt"][0]) & (df["Mt"] <= WINDOW["mt"][1]) &
            (df["Mh_calc"] >= WINDOW["mh"][0]) & (df["Mh_calc"] <= WINDOW["mh"][1]))
-    mts, mhs, g = regular_grid(df[sel], ["Stability", "S_exact"])
+    mts, mhs, g = regular_grid(df[sel], ["Stability", "S_exact", "lambda_min", "S_threshold"])
     mt_step = mts[1] - mts[0]
 
     # Diagnostics at the benchmark point (regenerate via dump_diagnostics).
