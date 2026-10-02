@@ -34,6 +34,7 @@ struct ScanConfig {
     size_t end_idx = 0;      // 0 -> full range
     std::string output_dir = "results";
     int precision = 12;      // significant digits for CSV output
+    double c6 = kDefaultC6;  // Planck-suppressed phi^6 coefficient
 };
 
 double parse_arg(const char* name, char* value) {
@@ -68,6 +69,7 @@ ScanConfig parse_args(int argc, char* argv[]) {
         else if (arg == "--end") cfg.end_idx = static_cast<size_t>(parse_arg(arg.c_str(), next_value()));
         else if (arg == "--output-dir") cfg.output_dir = next_value();
         else if (arg == "--precision") cfg.precision = static_cast<int>(parse_arg(arg.c_str(), next_value()));
+        else if (arg == "--c6") cfg.c6 = parse_arg(arg.c_str(), next_value());
         else {
             std::cerr << "Unknown argument: " << arg << std::endl;
             std::exit(1);
@@ -115,9 +117,9 @@ int main(int argc, char* argv[]) {
     file << std::setprecision(cfg.precision);
 
     if (cfg.use_analytical) {
-        file << "Mt,Mh_calc,Stability,S_approx\n";
+        file << "Mt,Mh_calc,Stability,S_conformal,method_flag\n";
     } else {
-        file << "Mt,Mh_calc,Stability,S_exact,S_approx,S_kinetic,S_potential,S_threshold,mu_inst,lambda_min\n";
+        file << "Mt,Mh_calc,Stability,S_trial,S_conformal,S_kinetic,S_potential,S_threshold,mu_inst,lambda_min,method_flag,c6\n";
     }
 
     std::cout << "Analyzing " << prefix << " points [" << cfg.start_idx << ", " << end_idx
@@ -132,16 +134,20 @@ int main(int argc, char* argv[]) {
         double Mh_input = cfg.mh_min + cfg.step * i_mh;
 
         if (cfg.use_analytical) {
-            auto res = classify_buttazzo(Mh_input, Mt);
+            // The conformal estimator has no shortcut/fence/ansatz-failure
+            // modes; its method flag is 0 (OK) or 4 (perturbativity lost).
+            auto res = classify_conformal(Mh_input, Mt);
+            int flag = (std::get<0>(res) == 4) ? MethodPerturbativityLost : MethodOK;
             file << Mt << "," << std::get<2>(res) << "," << std::get<0>(res)
-                 << "," << std::get<1>(res) << "\n";
+                 << "," << std::get<1>(res) << "," << flag << "\n";
         } else {
-            StabilityResult res = classify_stability(Mh_input, Mt);
+            StabilityResult res = classify_stability(Mh_input, Mt, kDefaultRgeStep, cfg.c6);
             file << Mt << "," << res.Mh << "," << res.status
-                 << "," << res.S_exact << "," << res.S_approx
+                 << "," << res.S_trial << "," << res.S_conformal
                  << "," << res.S_kinetic << "," << res.S_potential
                  << "," << res.S_threshold << "," << res.mu_inst
-                 << "," << res.lambda_min << "\n";
+                 << "," << res.lambda_min << "," << res.method_flag
+                 << "," << cfg.c6 << "\n";
         }
 
         if (i % 1000 == 0) std::cout << "Processed " << i << std::endl;

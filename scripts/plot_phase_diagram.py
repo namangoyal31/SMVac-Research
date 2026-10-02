@@ -68,9 +68,9 @@ def classification_map(ax, mts, mhs, g, contour_levels, ellipses, mt_step):
     ax.pcolormesh(mh_edges, mt_edges, status, cmap=cmap, norm=norm,
                   shading="flat", rasterized=True)
 
-    # Constant-action contours of the RG-improved ansatz action (where the
+    # Constant-action contours of the trial-profile action (where the
     # action is defined).
-    S = np.where(g["S_exact"] > 0, g["S_exact"], np.nan)
+    S = np.where(g["S_trial"] > 0, g["S_trial"], np.nan)
     if contour_levels:
         cs = ax.contour(mhs, mts, S, levels=contour_levels, colors="k",
                         linewidths=0.6, alpha=0.65)
@@ -80,18 +80,19 @@ def classification_map(ax, mts, mhs, g, contour_levels, ellipses, mt_step):
     # (the calculation itself exists only at the grid points; the contour
     # interpolation is purely visual):
     #   absolute stability:  lambda_min = 0   (solid)
-    #   metastability:       S_exact = S_threshold, where defined (dashed)
+    #   metastability:       S_trial = S_threshold, where defined (dashed)
     lam = np.where(g["Stability"] != 4, g["lambda_min"], np.nan)
     if np.isfinite(lam).any() and (lam > 0).any() and (lam < 0).any():
         ax.contour(mhs, mts, lam, levels=[0.0], colors="k", linewidths=1.4)
-    dS = np.where(np.isin(g["Stability"], [2, 3]) & (g["S_exact"] > 0),
-                  g["S_exact"] - g["S_threshold"], np.nan)
+    dS = np.where(np.isin(g["Stability"], [2, 3]) & (g["S_trial"] > 0),
+                  g["S_trial"] - g["S_threshold"], np.nan)
     if np.isfinite(dS).any() and (dS > 0).any() and (dS < 0).any():
         ax.contour(mhs, mts, dS, levels=[0.0], colors="k", linewidths=0.9,
                    linestyles="dashed")
 
-    # Ansatz-breakdown points (unstable with S <= 0): black dots.
-    bd = (g["Stability"] == 3) & (g["S_exact"] <= 0)
+    # Ansatz-breakdown points (method_flag = ANSATZ_FAILED, status 0 =
+    # undetermined): black dots. Never a physical class.
+    bd = g["method_flag"] == 3
     if bd.any():
         MM, HH = np.meshgrid(mts, mhs, indexing="ij")
         ax.plot(HH[bd], MM[bd], linestyle="none", marker="o", markersize=2.2,
@@ -142,7 +143,7 @@ def main():
     apply_style()
     if args.region == "full":
         df = pd.read_csv("data/numerical_full_plane_0p5GeV.csv")
-        mts, mhs, g = regular_grid(df, ["Stability", "S_exact", "lambda_min", "S_threshold"])
+        mts, mhs, g = regular_grid(df, ["Stability", "S_trial", "S_conformal", "lambda_min", "S_threshold", "method_flag"])
         mt_step = mts[1] - mts[0]
         output = args.output or "figures/01_full_phase_diagram.png"
         levels = [450, 600, 800, 1200, 2000, 4000, 10000]
@@ -153,7 +154,7 @@ def main():
         df = pd.read_csv("data/numerical_zoom_0p1GeV.csv")
         sel = ((df["Mt"] >= ZOOM_REGION["mt"][0]) & (df["Mt"] <= ZOOM_REGION["mt"][1]) &
                (df["Mh_calc"] >= ZOOM_REGION["mh"][0]) & (df["Mh_calc"] <= ZOOM_REGION["mh"][1]))
-        mts, mhs, g = regular_grid(df[sel], ["Stability", "S_exact", "lambda_min", "S_threshold"])
+        mts, mhs, g = regular_grid(df[sel], ["Stability", "S_trial", "S_conformal", "lambda_min", "S_threshold", "method_flag"])
         mt_step = mts[1] - mts[0]
         output = args.output or "figures/02_phenomenological_zoom.png"
         levels = [450, 600, 800, 1200, 2000, 4000, 10000, 30000]

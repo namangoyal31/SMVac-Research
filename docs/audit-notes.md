@@ -41,9 +41,14 @@ running and numerical potential integration**. It is *not* a solution of the
 Euclidean bounce equation: no shooting, relaxation, or collocation is
 performed, and the profile family is constrained to the conformal form with a
 single optimized scale. Because the true bounce minimizes the action over all
-profiles, the reported action is a variational **upper bound** on the exact
-bounce action. Earlier draft wording ("exact numerical bounce solver") was
-incorrect and has been removed everywhere.
+profiles, the reported action is a **trial-profile action estimate**. No
+inequality relating it to the exact bounce action is established: the O(4)
+bounce is a saddle point of the action, not a minimum over general field
+configurations (it minimizes the action only among solutions of the
+equations of motion, per Coleman, Glaser & Martin 1977 — a class the fixed
+trial profile does not belong to). Earlier draft wording ("exact numerical
+bounce solver", "variational upper bound") was incorrect and has been
+removed everywhere.
 
 ## Findings and disposition
 
@@ -64,7 +69,7 @@ incorrect and has been removed everywhere.
 | 13 | The `g3` beta function contains a 4-loop term with numeric coefficient `2472.28` whose provenance could not be established from the code or the cited literature | flagged | Kept (removing it would silently change the physics); its impact is measured: benchmark actions shift by ~0.10% when the term is dropped. Listed under known limitations |
 | 14 | `dAlphas = (alpha3_at_Mz - 0.1184)/0.0007` is identically zero: alpha_s is hard-coded to its central value | low | Documented; the parameterization is retained for future scans |
 | 15 | The repository contained debris from the legacy research repository: documentation of an unrelated third-party package, working notes with machine-specific paths, duplicated Python runners, an empty `CMakeLists.txt`, an empty `LICENSE`, and a `CITATION.cff` with a placeholder URL | medium | Removed; provenance of the migrated code retained in `docs/CODE_PROVENANCE.md` |
-| 16 | The NNLO matching conditions are a linearized fit around `(Mh, Mt) = (125.15, 173.34) GeV`; the `Mh`-dependence of `delta lambda` is not implemented | medium | The `Mh`-dependence enters through the tree-level `Mh^2/(2v^2)` term, which reproduces the fitted slope `d(lambda)/d(Mh) = 0.00206/GeV`; the residual non-linearity deviates from the linear fit of Buttazzo et al. (2013) by up to `8e-4` in `lambda(Mt)` at the scan edges (about `0.4 GeV` in boundary position). **More importantly, the previous `g2(Mt) = 0.65355` could not be traced to any published source and contradicts the cited NNLO references, which give `g2(Mt) = 0.64779` (Buttazzo et al. 2013, eq. 58); `g1(Mt)` was similarly updated to `0.462458`.** The corrected matching shifts the benchmark actions by `-2%` (deep metastability) to `-24%` (near the boundary), e.g. the FL action at the SM point changes from `2297.667` to `2049.326`. All references were regenerated (`reference/v1.1/`, via `apps/write_reference_tables.cpp`) and the change is recorded in `CHANGELOG.md` |
+| 16 | The NNLO matching conditions are a linearized fit around `(Mh, Mt) = (125.15, 173.34) GeV`; the `Mh`-dependence of `delta lambda` is not implemented | medium | The `Mh`-dependence enters through the tree-level `Mh^2/(2v^2)` term, which reproduces the fitted slope `d(lambda)/d(Mh) = 0.00206/GeV`; the residual non-linearity deviates from the linear fit of Buttazzo et al. (2013) by up to `8e-4` in `lambda(Mt)` at the scan edges (about `0.4 GeV` in boundary position). **More importantly, the previous `g2(Mt) = 0.65355` could not be traced to any published source and contradicts the cited NNLO references, which give `g2(Mt) = 0.64779` (Buttazzo et al. 2013, eq. 58); `g1(Mt)` was similarly updated to `0.462563`.** The corrected matching shifted the benchmark actions by `-2%` (deep in the unstable region) to `-24%` (near the boundary) — values from the pre-referee pass; the 2026-10 U(1) and 4-loop corrections supersede the exact numbers, e.g. the FL action at the SM point changes from `2297.667` to `2049.326`. All references were regenerated (`reference/v1.1/`, via `apps/write_reference_tables.cpp`) and the change is recorded in `CHANGELOG.md` |
 | 17 | Points with negative bounce action (ansatz breakdown far outside the conformal regime) are classified as unstable | known behaviour | Documented; the kinetic/potential decomposition is now exported so such points can be diagnosed |
 
 ## Verified claims carried forward
@@ -78,3 +83,44 @@ computation and are retained:
 * Near the boundary, `(Mh, Mt) = (134.75, 176.5) GeV`: the two differ by
   `+32.1%` (claimed: `32.1%`), confirming that the running-coupling
   corrections are essential near the metastability boundary.
+
+---
+
+## Addendum — independent referee pass (2026-10-02)
+
+An independent referee report (`SMVac_referee_report.md`, auditing HEAD
+`a1bca57`) identified four headline problems and several smaller ones; all
+P0 items were implemented in this pass:
+
+1. **Z Coleman–Weinberg normalization bug (fixed).** The Z mass
+   combination used the GUT-normalized `g1^2` instead of
+   `(3/5) g1^2 + g2^2`; the fix shifts the SM-point trial action
+   2103.1 -> 2168.7 (+3.1%), mu1 6.22e10 -> 7.60e10 GeV, and
+   `Mh_crit(173.1)` 129.17 -> 129.05 GeV.
+2. **"Variational upper bound" retracted everywhere** (see the corrected
+   characterization above and docs/theory.md §5.1). The empirical
+   counterargument stands: non-positive trial actions exist in the data,
+   which no upper bound on a positive bounce action could permit.
+3. **"+30% RG improvement near the boundary" retracted**: with `c6 = 0`
+   the trial action matches the conformal estimate to <1% at every tested
+   point; the near-boundary enhancement is the assumed `c6 = 1` operator.
+   `c6` is now a runtime parameter (`--c6`) and the sensitivity is
+   documented (docs/limitations.md item 3, RESULTS.md).
+4. **`2472.28` traced and sign-corrected**: it is the pure-QCD four-loop
+   beta_3 at nf = 6 (van Ritbergen, Vermaseren & Larin 1997); the code's
+   convention requires `-2472.28`. Numerical impact ~0.1%.
+5. **Literature comparison re-anchored**: the unverified "128.6 GeV
+   (Buttazzo Fig. 1)" was removed; the test now uses Degrassi et al. (2012)
+   eq. (2), `129.4 +- 1.0 GeV` at the same inputs (Mt = 173.1,
+   alpha_s = 0.1184), with the like-for-like caveats stated.
+6. **Method flags added**: fence / ansatz-failure / kinetic-shortcut /
+   perturbativity-loss are recorded per point and fence points get
+   `S_trial = NaN` instead of a 1e100 sentinel; non-positive-action points
+   are status 0 (undetermined), never "unstable".
+7. **Renames**: `S_exact` -> `S_trial`, `S_approx` -> `S_conformal`,
+   `classify_buttazzo` -> `classify_conformal`.
+
+Known issues deliberately left open (documented, not patched): the
+amplitude/potential mismatch of the trial family (limitations.md item 13);
+gauge dependence of mu1 (item 5); prefactor-scale convention (item 4,
+now quantified); 3-loop coefficient line-by-line provenance (item 9).

@@ -3,7 +3,7 @@
 
 Compares every committed scan resolution and reports:
 
-1. Reproducibility: S_exact at grid points common to all datasets must be
+1. Reproducibility: S_trial at grid points common to all datasets must be
    bit-identical (the pipeline is deterministic; any difference would mean
    a dataset was produced by different code or settings).
 2. Stability-boundary location at fixed Mt: grid-level last transition and
@@ -89,7 +89,7 @@ def main():
         vals = []
         for name, df in datasets.items():
             sel = df[(np.isclose(df["Mt"], mt)) & (np.isclose(df["Mh_calc"], mh))]
-            vals.append(f"{sel['S_exact'].iloc[0]:.4f}" if len(sel) else "n/a")
+            vals.append(f"{sel['S_trial'].iloc[0]:.4f}" if len(sel) else "n/a")
         print(f"| ({mh}, {mt}) | " + " | ".join(vals) + " |")
     print()
 
@@ -108,7 +108,7 @@ def main():
     print("|---|---|---|---|---|---|")
     for name, df in datasets.items():
         fr = status_fractions(df)
-        nbd = int(((df["Stability"] == 3) & (df["S_exact"] <= 0)).sum())
+        nbd = int((df["method_flag"] == 3).sum())
         print(f"| {name} | {fr[1]:.4f} | {fr[2]:.4f} | {fr[3]:.4f} | "
               f"{fr[4]:.4f} | {nbd} |")
     print()

@@ -50,13 +50,13 @@ def main():
 
     # (a) RK4 step convergence.
     from matplotlib.ticker import ScalarFormatter
-    S_ref = dt_df["S_exact"].iloc[-1]
-    ax_a.plot(dt_df["dt"], dt_df["S_exact"], marker="o", color="black",
+    S_ref = dt_df["S_trial"].iloc[-1]
+    ax_a.plot(dt_df["dt"], dt_df["S_trial"], marker="o", color="black",
               lw=1.0, markersize=4.5)
     ax_a.axvline(0.1, color="#c62828", lw=1.0, linestyle="--")
     ax_a.annotate(r"production $\Delta t = 0.1$", xy=(0.1, S_ref),
                   xytext=(0.11, S_ref + 0.012), fontsize=8, color="#c62828")
-    d_prod = abs(dt_df.loc[dt_df["dt"] == 0.1, "S_exact"].iloc[0] - S_ref)
+    d_prod = abs(dt_df.loc[dt_df["dt"] == 0.1, "S_trial"].iloc[0] - S_ref)
     ax_a.annotate(rf"$|S(0.1) - S(0.0125)|/S \approx {d_prod / S_ref:.0e}$",
                   xy=(0.03, S_ref - 0.02), fontsize=8)
     ax_a.set_xscale("log")
@@ -69,8 +69,8 @@ def main():
     ax_a.set_xlabel(r"RK4 step $\Delta t$  [$t = \ln\mu^2$]")
     ax_a.set_ylabel(r"$S_\ast$ at $(125.1,\ 173.1)$ GeV")
     ax_a.set_title("(a) RG-step convergence", fontsize=9.5)
-    pad = (dt_df["S_exact"].max() - dt_df["S_exact"].min()) * 4 + 1e-3
-    ax_a.set_ylim(S_ref - pad, dt_df["S_exact"].max() + pad)
+    pad = (dt_df["S_trial"].max() - dt_df["S_trial"].min()) * 4 + 1e-3
+    ax_a.set_ylim(S_ref - pad, dt_df["S_trial"].max() + pad)
 
     # (b) quadrature convergence to the round-off floor.
     S_quad_ref = quad_df["S_at_Ropt"].iloc[-1]

@@ -1,4 +1,4 @@
-// Regression test: both classifiers at the benchmark SM point must reproduce
+// Regression test: both estimators at the benchmark SM point must reproduce
 // the frozen reference values of reference/v1.1/benchmark_results*.json.
 // Regression, not independent physics validation (see tests/physics and
 // docs/validation.md).
@@ -29,29 +29,31 @@ int main() {
 
     std::cout << "Running Regression Validation for Benchmark Point: Mh=" << Mh << " GeV, Mt=" << Mt << " GeV" << std::endl;
 
-    // Fubini-Lipatov (Analytical) Benchmark
-    auto fl_res = classify_buttazzo(Mh, Mt);
+    // Strict conformal estimate
+    auto fl_res = classify_conformal(Mh, Mt);
     int fl_status = std::get<0>(fl_res);
     double fl_action = std::get<1>(fl_res);
 
-    // Canonical Bounce (Numerical) Benchmark
+    // RG-improved trial-profile action
     StabilityResult num_res = classify_stability(Mh, Mt);
 
-    // Expected values from reference/v1.1 (regenerated after the matching and
-    // interpolation corrections; see docs/audit-notes.md and CHANGELOG.md)
+    // Expected values from reference/v1.1 (regenerated after the U(1)
+    // normalization fix, the 4-loop sign fix and the method-flag refactor;
+    // see docs/audit-notes.md and CHANGELOG.md)
     int expected_status = 2; // Metastable
-    double expected_fl_action = 2051.1373669116429;
-    double expected_num_action = 2103.1046353416655;
+    double expected_conformal = 2120.340020693041;
+    double expected_trial = 2168.6895796842282;
 
-    std::cout << "\nValidating Analytical solver..." << std::endl;
-    assert_equal(fl_status, expected_status, "FL Status");
-    assert_close(fl_action, expected_fl_action, 1e-9, "FL Action");
+    std::cout << "Validating conformal estimator..." << std::endl;
+    assert_equal(fl_status, expected_status, "Conformal Status");
+    assert_close(fl_action, expected_conformal, 1e-9, "Conformal Action");
 
-    std::cout << "Validating Numerical solver..." << std::endl;
-    assert_equal(num_res.status, expected_status, "Numerical Status");
-    assert_close(num_res.S_exact, expected_num_action, 1e-9, "Numerical Exact Action");
-    assert_close(num_res.S_approx, expected_fl_action, 1e-9, "Numerical Approx Action");
+    std::cout << "Validating trial-profile estimator..." << std::endl;
+    assert_equal(num_res.status, expected_status, "Trial Status");
+    assert_equal(num_res.method_flag, MethodOK, "Trial MethodFlag");
+    assert_close(num_res.S_trial, expected_trial, 1e-9, "Trial Action");
+    assert_close(num_res.S_conformal, expected_conformal, 1e-9, "Trial-path Conformal Action");
 
-    std::cout << "\nAll regression validations PASS!" << std::endl;
+    std::cout << "All regression validations PASS!" << std::endl;
     return 0;
 }

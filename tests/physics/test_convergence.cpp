@@ -37,13 +37,13 @@ static void build_table(RGEHelper& rge, double Mh, double Mt, double dt) {
 int main() {
     const double Mh = 125.1, Mt = 173.1;
 
-    std::printf("=== 1. RGE step-size convergence (S_exact at the SM point) ===\n");
+    std::printf("=== 1. RGE step-size convergence (S_trial at the SM point) ===\n");
     std::vector<double> steps = {0.2, 0.1, 0.05, 0.025};
     std::vector<double> S;
     for (double dt : steps) {
         StabilityResult r = classify_stability(Mh, Mt, dt);
-        S.push_back(r.S_exact);
-        std::printf("dt = %-6.3f  S_exact = %.9f  (mu1 = %.6e)\n", dt, r.S_exact, r.mu_inst);
+        S.push_back(r.S_trial);
+        std::printf("dt = %-6.3f  S_trial = %.9f  (mu1 = %.6e)\n", dt, r.S_trial, r.mu_inst);
     }
     double rel_01 = std::abs(S[1] - S[3]) / S[3];
     std::printf("|S(0.1) - S(0.025)|/S = %.3e\n", rel_01);
@@ -99,7 +99,8 @@ int main() {
     std::printf("=== 3. Radius minimization: golden section vs fine grid ===\n");
     // Compare the minimization algorithms at a common (coarse) quadrature
     // setting, so the comparison isolates the minimization, not the
-    // quadrature. Fine grid over the same 16-decade bracket.
+    // quadrature. Fine grid over the same bracket (+-8 in ln R, ~7 decades
+    // in R).
     const int Ncoarse = 64;
     double logR_opt = std::log(mu_inst / std::exp(t_min / 2.0));
     auto action = [&](double logR) {

@@ -48,17 +48,17 @@ def main():
 
     apply_style()
     df = pd.read_csv("data/numerical_full_plane_0p5GeV.csv")
-    mts, mhs, g = regular_grid(df, ["Stability", "S_exact", "S_kinetic"])
+    mts, mhs, g = regular_grid(df, ["Stability", "S_trial", "S_kinetic", "method_flag"])
 
     status = g["Stability"]
     cat = np.full_like(status, CAT_RELIABLE, dtype=float)
     cat[status == 1] = CAT_NO_ACTION
-    shortcut = (status != 1) & (g["S_exact"] > 0) & (g["S_exact"] >= 4.9e5) & (g["S_kinetic"] < 1e6)
-    fence = (status != 1) & ((g["S_exact"] >= 1e99) | (g["S_kinetic"] >= 1e6))
+    shortcut = (status != 1) & (g["S_trial"] > 0) & (g["S_trial"] >= 4.9e5) & (g["S_kinetic"] < 1e6)
+    fence = (status != 1) & ((g["S_trial"] >= 1e99) | (g["S_kinetic"] >= 1e6))
     cat[shortcut] = CAT_SHORTCUT
     cat[fence] = CAT_FENCE
     cat[status == 4] = CAT_NONPERT
-    breakdown = (status == 3) & (g["S_exact"] <= 0)
+    breakdown = (g["method_flag"] == 3)
     cat[breakdown] = CAT_NO_ACTION  # fill under the dots (they sit in the unstable band)
 
     fig, ax = plt.subplots(figsize=(7.4, 6.4))

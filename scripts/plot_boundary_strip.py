@@ -43,10 +43,10 @@ def main():
     num = pd.read_csv("data/numerical_boundary_0p05GeV.csv")
     ana = pd.read_csv("data/analytical_boundary_0p05GeV.csv")
     key = ["Mt", "Mh_calc"]
-    m = num[key + ["Stability", "S_exact", "lambda_min"]].merge(
+    m = num[key + ["Stability", "S_trial", "lambda_min", "method_flag"]].merge(
         ana[key + ["Stability"]], on=key, how="inner", suffixes=("_rg", "_conf"))
-    mts, mhs, g = regular_grid(m, ["Stability_rg", "S_exact", "Stability_conf",
-                                   "lambda_min"])
+    mts, mhs, g = regular_grid(m, ["Stability_rg", "S_trial", "Stability_conf",
+                                   "lambda_min", "method_flag"])
 
     fig, ax = plt.subplots(figsize=(7.2, 6.0))
     from matplotlib.colors import ListedColormap, BoundaryNorm
@@ -64,7 +64,7 @@ def main():
     if np.isfinite(lam).any() and (lam > 0).any() and (lam < 0).any():
         ax.contour(mhs, mts, lam, levels=[0.0], colors="black", linewidths=1.2)
 
-    breakdown = (g["Stability_rg"] == 3) & (g["S_exact"] <= 0)
+    breakdown = g["method_flag"] == 3
     diff = g["Stability_rg"] != g["Stability_conf"]
     MM, HH = np.meshgrid(mts, mhs, indexing="ij")
     if diff.any():

@@ -10,37 +10,43 @@ quantify when the strict conformal approximation is adequate.
 
 ![Full Standard Model vacuum phase diagram](figures/01_full_phase_diagram.png)
 
-*Stability of the SM vacuum across the full $(M_h, M_t)$ plane (RG-improved
-Fubini–Lipatov estimator, 1 GeV resolution). **Green:** the RG-improved
-quartic coupling stays positive up to the Planck scale (absolute stability).
-**Yellow:** the coupling turns negative but the estimated decay action
-exceeds the age-of-the-universe threshold (metastable). **Red:** the action
-falls below the threshold (unstable). **Black:** the RGEs themselves leave
-their perturbative range. The star marks the experimental point
-$(125.1, 173.1)$ GeV, which lies in the metastable region near the
-stability boundary; black dots along that boundary are the documented
-ansatz-breakdown artifact, not physical instabilities. Grey contours:
-constant RG-improved action. The phenomenological window is resolved at
-0.25 GeV in the figures below.*
+*Extended computational visualization of the SM vacuum classification over
+the full $(M_h, M_t)$ plane (trial-profile estimator, 0.5 GeV resolution).
+**Green:** the RG-improved quartic coupling stays positive up to the Planck
+scale (absolute stability). **Yellow:** the coupling turns negative but the
+estimated decay action exceeds the age-of-the-universe threshold
+(metastable). **Red:** the action falls below the threshold (unstable).
+**Black:** the RGEs themselves leave their perturbative range. The solid
+line is the $\lambda_{\min} = 0$ stability boundary; the star marks the
+experimental point $(125.1, 173.1)$ GeV in the metastable region. Brown
+dots along that boundary are ansatz-breakdown points — a documented
+artifact of the fixed trial profile, not physical instabilities. **Caveat:**
+the NNLO matching is linearized around $(125.15, 173.34)$ GeV, so regions
+far from that window are extrapolations of the fit, not SM predictions;
+the physically meaningful view is the zoom below.*
 
 ![Phenomenological zoom](figures/02_phenomenological_zoom.png)
 
-*The phenomenologically relevant window at 0.25 GeV resolution with the
+*The phenomenologically relevant window at 0.1 GeV resolution with the
 PDG 2022 $1\sigma$/$2\sigma$ region and constant-action contours.*
 
-![Conformal vs RG-improved classification](figures/05_conformal_vs_rg_difference.png)
+![Conformal vs trial-profile classification](figures/05_conformal_vs_rg_difference.png)
 
 *Classification difference map: where the strict conformal estimate and the
-RG-improved evaluation disagree over the full plane. Differences
-concentrate along the classification boundaries — this is a comparison of
-two approximations, not a correctness statement (see
+trial-profile evaluation disagree over the full plane. Differences
+concentrate along the classification boundaries and are driven mainly by
+the assumed $c_6 = 1$ Planck operator and by ansatz breakdown — a
+comparison of two approximations, not a correctness statement (see
 [docs/figures.md](docs/figures.md)).*
 
 ![Fractional action difference](figures/06_action_fractional_difference.png)
 
-*Fractional difference $(S_{\rm exact}-S_{\rm approx})/S_{\rm approx}$ over
-the metastable region: the RG improvement changes the action by ≈30% near
-the stability boundary and is negligible deep in the metastable region.*
+*Fractional difference $(S_{\rm trial}-S_{\rm conformal})/S_{\rm conformal}$
+over the metastable region, with and without the assumed Planck operator.
+At $c_6 = 0$ the trial-profile and conformal actions agree to ≲1%
+everywhere — RG improvement alone barely moves the action inside this
+trial family. The large differences at $c_6 = 1$ near the boundary are the
+assumed Planck operator, not RG physics.*
 
 The complete figure set — including the action-contour map, the
 validity/breakdown map, the $S(R)$ decomposition, the RG-running panels,
@@ -52,41 +58,62 @@ and the numerical-convergence figure — is collected with full captions in
 1. **Matching.** NNLO electroweak matching conditions at the top scale
    (Buttazzo et al. 2013), linearized around the central masses.
 2. **Running.** The 3-loop SM RG equations for
-   $(g_1, g_2, g_3, y_t, y_b, y_\tau, \lambda)$, integrated by RK4 from
-   $M_t$ to the Planck scale.
+   $(g_1, g_2, g_3, y_t, y_b, y_\tau, \lambda)$ (plus the pure-QCD 4-loop
+   $g_3$ piece), integrated by RK4 from $M_t$ to the Planck scale.
 3. **Potential.** The RG-improved 1-loop effective potential
    $V(\phi) = \lambda_{\rm eff}(\phi)\,\phi^4/4$ with $\mu = \phi$ (the
    high-field approximation: the false vacuum sits at the origin).
-4. **Action.** The bounce action evaluated on the conformal profile with a
-   running-coupling amplitude, minimized over the profile scale; plus the
-   strict conformal estimate $S_{\rm approx} = 8\pi^2/(3|\lambda_{\min}|)$.
+4. **Action.** The Euclidean action evaluated on a restricted
+   Fubini–Lipatov trial-profile family with running-coupling amplitude,
+   minimized over the profile scale — a **trial-profile action estimate**,
+   not a bounce solution (see below); plus the strict conformal estimate
+   $S_{\rm conformal} = 8\pi^2/(3|\lambda_{\min}|)$.
 5. **Classification.** Stable / metastable / unstable via the Coleman
-   criterion $\Gamma/V \sim t_U^{-4}$ with $t_U = 10$ Gyr.
+   criterion $\Gamma/V \sim t_U^{-4}$ with $t_U = 10$ Gyr; points where the
+   method fails (ansatz breakdown, fence, perturbativity loss) carry an
+   explicit method flag and are never counted as physical verdicts.
 
-**Scope and honesty of the method.** The bounce equation is *not* solved;
-the profile family is fixed (conformal) and only its scale is optimized, so
-the reported action is a **variational upper bound** on the true bounce
-action. The *stability boundary* ($\lambda_{\min} = 0$) does not depend on
-the ansatz and is the robust output; absolute lifetimes in the metastable
-region inherit the ansatz systematics. All approximations are documented in
+**Scope and honesty of the method.** The bounce equation is *not* solved.
+The code evaluates the Euclidean action on a restricted Fubini–Lipatov-type
+trial-profile family and minimizes that action over the profile scale; the
+result is a **trial-profile action estimate**. No inequality relating this
+quantity to the exact bounce action is established here: the O(4) bounce is
+a saddle point of the action, not a minimum over general field
+configurations, so the trial action can lie above or below the true bounce
+action. (Coleman, Glaser & Martin showed the bounce minimizes the action
+only among *solutions of the equations of motion* — a class the fixed
+trial profile does not belong to.) The *stability boundary*
+($\lambda_{\min} = 0$) does not depend on the ansatz and is the robust
+output. All approximations are documented in
 [docs/theory.md](docs/theory.md) and
 [docs/limitations.md](docs/limitations.md).
 
-## Main results (reproduced by the committed example data)
+## Main results (reproduced by the committed data)
 
+* The **absolute stability boundary** — the robust, ansatz-independent
+  output — is at $M_h^{\rm crit}(M_t = 173.1) = 129.05$ GeV, within the
+  published theory uncertainty of the NNLO anchor
+  $129.4 \pm 1.0$ GeV (Degrassi et al. 2012, eq. (2) at the same inputs;
+  this code omits their 2-loop potential and 3-loop QCD threshold pieces,
+  so the comparison is a consistency check, not a validation).
 * At the benchmark point $(M_h, M_t) = (125.1, 173.1)$ GeV the vacuum is
-  **metastable**: $\lambda_{\rm eff}$ crosses zero at $\mu_1 \simeq
-  6.2\times10^{10}$ GeV, the optimized ansatz action is
-  $S_\ast = 2103.10$ against a threshold of $483$, in agreement with the
-  literature consensus that the SM lifetime exceeds the age of the universe.
-* The **absolute stability boundary** is located at
-  $M_h^{\rm crit} = 129.2$ GeV for $M_t = 173.1$ GeV, within $0.6$ GeV of
-  the published NNLO value $\simeq 128.6$ GeV (enforced as a band check in
-  `tests/physics/test_boundary.cpp`).
-* The RG improvement of the action matters **near the stability boundary**
-  and is negligible deep in the metastable region: the fractional difference
-  from the strict conformal estimate grows from $\sim 0$ at
-  $(115, 180)$ GeV to $\sim +30\%$ at $(134.75, 176.5)$ GeV.
+  **metastable**: $\lambda_{\rm eff}$ crosses zero at
+  $\mu_1 \simeq 7.6\times10^{10}$ GeV and the trial-profile action
+  ($S_{\rm trial} = 2168.7$ at $c_6 = 1$) far exceeds the metastability
+  threshold ($484$), consistent with the literature consensus that the SM
+  lifetime exceeds the age of the universe.
+* **The Planck-suppressed operator dominates the near-boundary action.**
+  Inside the trial family, RG improvement of the potential changes the
+  action by $\lesssim 1\%$ ($S_{\rm trial}/S_{\rm conformal} - 1 =
+  -0.08\%$ at the SM point, $-0.9\%$ at $(134.75, 176.5)$ with $c_6 = 0$).
+  The assumed $\phi^6/M_{\rm Pl}^2$ operator with $c_6 = 1$ raises the
+  action by up to $+33\%$ near the boundary ($c_6$-dependent; the
+  coefficient is an assumption, not a prediction). Earlier drafts quoted
+  this as an "RG improvement" effect of ≈30% — that was incorrect.
+* With negative $c_6$ the trial action is unbounded below along the
+  profile family ($S_{\rm trial} \to -10^{12}$ at $c_6 = -1$, SM point) —
+  an explicit demonstration that no bound relation to the true bounce
+  action exists for this method.
 
 ## Quick start
 
@@ -156,16 +183,24 @@ figures/                 committed figures (generated by scripts/)
 The full list with discussion is in
 [docs/limitations.md](docs/limitations.md). The most important:
 
-* the conformal profile is a variational ansatz — no bounce-equation solve,
-  so actions are upper bounds and the decay rate is underestimated;
+* the conformal profile is a variational ansatz — no bounce-equation solve.
+  The resulting **trial-profile action has no established relation (bound
+  or otherwise) to the exact bounce action**, and its trial-family
+  dependence is unquantified (no independent bounce solver was run);
 * the high-field potential omits the tree-level mass term (false vacuum at
   the origin, not the electroweak vacuum);
-* the Planck-suppressed $\phi^6$ regularization is hard-coded with
-  coefficient $c_6 = 1$ (no literature provenance established);
-* the decay-rate prefactor uses the $\lambda$ zero-crossing scale; its
-  radius dependence is neglected (cf. Andreassen, Frost & Schwartz 2018);
-* a 4-loop $g_3$ beta-function term with an untraceable coefficient
-  ($2472.28$) is retained as-is; measured impact $\sim 0.1\%$.
+* the Planck-suppressed $\phi^6$ term is an **assumed** regulator with
+  coefficient $c_6 = 1$; it dominates the near-boundary action and the
+  sign/size of a physical Planck-scale operator are unknown (negative
+  $c_6$ makes the trial action unbounded below);
+* the decay-rate prefactor uses the $\lambda$ zero-crossing scale (a
+  gauge-dependent quantity); the physically motivated $1/R_\ast$ scale
+  would raise the threshold by $\sim 10\%$ (cf. Andreassen, Frost &
+  Schwartz 2018);
+* the $g_3$ running includes only the pure-QCD 4-loop piece
+  ($-\beta_3(n_f{=}6) = -2472.28$); the remaining SM 4-loop terms are
+  absent, so the running is not a complete 4-loop SM result
+  (measured impact of the piece: $\sim 0.1\%$).
 
 ## Citation
 

@@ -2,7 +2,7 @@
 """Figure 04: magnitude of the RG-improved Fubini-Lipatov action over the
 phenomenological window.
 
-Filled map of log10 S_exact (continuous quantity -> heatmap, viridis scale),
+Filled map of log10 S_trial (continuous quantity -> heatmap, viridis scale),
 with labeled constant-action contours. The action is only defined where the
 running quartic coupling turns negative; in the absolutely stable region
 (lower right) no bounce exists (hatched), and along the stability boundary
@@ -36,36 +36,36 @@ def main():
     df = pd.read_csv("data/numerical_zoom_0p1GeV.csv")
     sel = ((df["Mt"] >= ZOOM_REGION["mt"][0]) & (df["Mt"] <= ZOOM_REGION["mt"][1]) &
            (df["Mh_calc"] >= ZOOM_REGION["mh"][0]) & (df["Mh_calc"] <= ZOOM_REGION["mh"][1]))
-    mts, mhs, g = regular_grid(df[sel], ["S_exact", "Stability"])
+    mts, mhs, g = regular_grid(df[sel], ["S_trial", "Stability"])
 
     # The action is only meaningful below the kinetic-shortcut/fence
-    # region: rows with S_exact >= 4.9e5 are either the kinetic shortcut
+    # region: rows with S_trial >= 4.9e5 are either the kinetic shortcut
     # (returned without the potential integral) or the search-bracket fence
     # (S = 1e100, no radius with lambda_R < 0). Both are classified
     # metastable, but the *value* is not a full action calculation; they are
     # blanked here and shown explicitly in figure 07.
     ACTION_MASK = 4.9e5
     valid = (np.isin(g["Stability"], [2, 3]) &
-             (g["S_exact"] > 0) & (g["S_exact"] < ACTION_MASK))
-    logS = np.where(valid, np.log10(np.where(g["S_exact"] > 0, g["S_exact"], 1.0)),
+             (g["S_trial"] > 0) & (g["S_trial"] < ACTION_MASK))
+    logS = np.where(valid, np.log10(np.where(g["S_trial"] > 0, g["S_trial"], 1.0)),
                     np.nan)
 
     fig, ax = plt.subplots(figsize=(7.0, 5.4))
     mesh = ax.pcolormesh(mhs, mts, logS, cmap="viridis", shading="auto",
                          rasterized=True)
     cbar = fig.colorbar(mesh, ax=ax, pad=0.02)
-    cbar.set_label(r"$\log_{10} S_{\rm exact}$  ($S$ dimensionless)")
+    cbar.set_label(r"$\log_{10} S_{\rm trial}$  ($S$ dimensionless)")
 
     levels = [450, 600, 800, 1200, 2000, 4000, 8000, 16000, 32000, 64000, 130000]
-    cs = ax.contour(mhs, mts, np.where(valid, np.where(g["S_exact"] > 0,
-                                                       g["S_exact"], np.nan), np.nan),
+    cs = ax.contour(mhs, mts, np.where(valid, np.where(g["S_trial"] > 0,
+                                                       g["S_trial"], np.nan), np.nan),
                     levels=levels, colors="k", linewidths=0.55, alpha=0.9)
     ax.clabel(cs, fmt=lambda v: f"S={v:.0f}", fontsize=6.3, inline=True,
               colors="white")
 
     # Blank strip adjacent to the stability boundary: kinetic-shortcut and
     # fence points (no full action integral; see figure 07).
-    noblank = (np.isin(g["Stability"], [2, 3]) & (g["S_exact"] >= ACTION_MASK))
+    noblank = (np.isin(g["Stability"], [2, 3]) & (g["S_trial"] >= ACTION_MASK))
     if noblank.any():
         MM, HH = np.meshgrid(mts, mhs, indexing="ij")
         ax.plot(HH[noblank], MM[noblank], linestyle="none", marker="s",

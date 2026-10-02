@@ -10,7 +10,7 @@ Figures (written to figures/, documented in docs/figures.md):
     03_experimental_point            benchmark point vs stability boundary
     04_action_contours               action magnitude over the SM window
     05_conformal_vs_rg_difference    classification difference map
-    06_action_fractional_difference  (S_exact - S_approx)/S_approx heatmap
+    06_action_fractional_difference  (S_trial - S_conformal)/S_conformal heatmap
     07_ansatz_breakdown              validity/breakdown map (full plane)
     08_action_vs_R                   S(R) decomposition at the SM point
     09_rg_running                    RG running of the couplings

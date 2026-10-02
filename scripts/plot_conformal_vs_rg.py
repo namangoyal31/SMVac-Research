@@ -3,9 +3,9 @@
 RG-improved ansatz.
 
 For every grid point of the full (Mh, Mt) plane, the vacuum classification
-from the strict conformal estimate S_approx = 8 pi^2/(3|lambda_min|) is
+from the strict conformal estimate S_conformal = 8 pi^2/(3|lambda_min|) is
 compared with the classification from the RG-improved ansatz action
-S_exact. Only points where the two classifications differ are highlighted:
+S_trial. Only points where the two classifications differ are highlighted:
 
     blue  : RG-improved classifies MORE stable than the conformal estimate
     red   : RG-improved classifies LESS stable
@@ -44,20 +44,21 @@ def main():
     ana = pd.read_csv("data/analytical_full_plane_0p5GeV.csv")
 
     key = ["Mt", "Mh_calc"]
-    merged = num[key + ["Stability", "S_exact"]].merge(
+    merged = num[key + ["Stability", "S_trial", "method_flag"]].merge(
         ana[key + ["Stability"]], on=key, how="inner",
         suffixes=("_rg", "_conf"))
     if len(merged) < 0.99 * len(num):
         raise SystemExit("analytical and numerical full-plane grids do not "
                          "cover the same points; refusing to plot")
 
-    mts, mhs, g = regular_grid(merged, ["Stability_rg", "Stability_conf", "S_exact"])
+    mts, mhs, g = regular_grid(merged, ["Stability_rg", "Stability_conf",
+                                        "S_trial", "method_flag"])
     st_rg = g["Stability_rg"]
     st_conf = g["Stability_conf"]
 
     # Difference categories (grid arrays for scatter).
     MM, HH = np.meshgrid(mts, mhs, indexing="ij")
-    breakdown = ((st_rg == 3) & (g["S_exact"] <= 0)) | (st_rg == 4) | (st_conf == 4)
+    breakdown = (g["method_flag"] == 3) | (st_rg == 4) | (st_conf == 4)
     rg_more_stable = (st_conf == 3) & (st_rg == 2)
     rg_less_stable = ((st_conf == 2) & (st_rg == 3)) | ((st_conf == 1) & (st_rg != 1))
     other = (st_rg != st_conf) & ~breakdown & ~rg_more_stable & ~rg_less_stable

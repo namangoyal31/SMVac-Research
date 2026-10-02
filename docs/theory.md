@@ -32,8 +32,9 @@ This repository computes, in the $(M_h, M_t)$ plane:
 The two-step nature of the method must be kept in mind when interpreting
 results: the *stability boundary* follows directly from the RG potential and
 is robust; the *action in the metastable region* is computed for a fixed
-(conformal) profile family and is a variational upper bound on the true
-bounce action. See §6 and [limitations.md](limitations.md).
+(conformal) profile family and carries **no established relation to the
+exact bounce action** — it is a trial-profile estimate, not a bound (see
+§5.1). See §6 and [limitations.md](limitations.md).
 
 ## 2. Setup and conventions
 
@@ -77,7 +78,7 @@ y_t(M_t) \;=\; \frac{\sqrt{2}\,M_t}{v} \;-\; 0.0587 \;-\; 0.00042\,
 $$
 
 $$
-g_1(M_t) = 0.462458 + 0.000142\,(M_t - 173.34), \qquad
+g_1(M_t) = 0.462563 + 0.000142\,(M_t - 173.34), \qquad
 g_2(M_t) = 0.64779 + 0.00004\,(M_t - 173.34),
 $$
 
@@ -111,10 +112,12 @@ Notes and caveats (see also `docs/audit-notes.md`, finding 16):
 The 3-loop SM beta functions for $(g_1, g_2, g_3,\, y_t, y_b, y_\tau,\,
 \lambda)$ are implemented exactly as compiled in Buttazzo et al. (2013)
 Appendix (numerically expanded, in the squared-coupling variable $X = x^2$
-with the $\mathrm{d}/\mathrm{d}\ln\mu^2$ convention of §2), plus one
-additional 4-loop pure-gauge $g_3$ term whose coefficient ($2472.28$) could
-not be traced to a published source; its measured impact on the benchmark
-actions is $\sim 0.1\%$ (`docs/audit-notes.md`, finding 13). The system is
+with the $\mathrm{d}/\mathrm{d}\ln\mu^2$ convention of §2), plus the
+pure-QCD 4-loop $g_3$ contribution $-\beta_3(n_f{=}6)\,g_3^{10}/(16\pi^2)^4$
+with $\beta_3(n_f{=}6) = 2472.28$ (van Ritbergen, Vermaseren & Larin 1997;
+sign corrected 2026-10). Only this piece of the 4-loop running is included;
+its measured impact on the benchmark actions is $\sim 0.1\%$
+(`docs/audit-notes.md`, finding 13). The system is
 
 $$
 \frac{\mathrm{d}X_i}{\mathrm{d}t} = \beta_i^{(1)} + \frac{\beta_i^{(2)}}{(16\pi^2)} +
@@ -142,15 +145,20 @@ $$
 with the 1-loop Coleman–Weinberg correction from the top quark and the
 $W/Z$ gauge bosons, written with field-dependent masses
 $m_t^2 = \tfrac12 y_t^2\phi^2$, $m_W^2 = \tfrac14 g_2^2\phi^2$,
-$m_Z^2 = \tfrac14 (g_1^2+g_2^2)\phi^2$:
+$m_Z^2 = \tfrac14 (g_Y^2+g_2^2)\phi^2$, where $g_Y = \sqrt{3/5}\,g_1$ is
+the physical hypercharge coupling ($g_1$ is GUT-normalized in this code):
 
 $$
 \Delta\lambda_{\mathrm{CW}} = \frac{1}{16\pi^2}\left[
 -3 y_t^4\left(\ln\frac{y_t^2}{2} - \frac32\right)
 + \frac{3}{8} g_2^4\left(\ln\frac{g_2^2}{4} - \frac56\right)
-+ \frac{3}{16}(g_1^2{+}g_2^2)^2\left(\ln\frac{g_1^2+g_2^2}{4} - \frac56\right)
++ \frac{3}{16}\left(\tfrac35 g_1^2{+}g_2^2\right)^2\left(\ln\frac{(3/5)g_1^2+g_2^2}{4} - \frac56\right)
 \right].
 $$
+
+(An earlier version used $g_1^2 + g_2^2$ in the Z combination —
+inconsistent with the GUT normalization used everywhere else; fixed 2026-10,
+see CHANGELOG and `docs/audit-notes.md`.)
 
 (These are the $n_i m_i^4(\ln(m_i^2/\mu^2) - c_i)/(64\pi^2)$ terms with
 $\mu = \phi$, $n_t = -12$, $c_t = 3/2$, $n_W = 6$, $n_Z = 3$, $c_V = 5/6$,
@@ -193,13 +201,22 @@ $$
 \phi'(0) = 0, \quad \phi(\infty) = 0 .
 $$
 
-The true bounce minimizes $S$ over *all* profiles. **This code never solves
-the bounce equation.** Instead it evaluates $S$ on the Fubini–Lipatov
-(conformal) profile family and minimizes over its single scale parameter.
-The result is therefore a **variational upper bound**: $S_{\rm ansatz} \ge
-S_{\rm true}$, i.e. decay rates are underestimated and lifetimes
-overestimated. For the pure-quartic potential the family contains the exact
-solution and the bound is saturated.
+The bounce is a **saddle point of the Euclidean action, not a minimum**:
+it has one negative mode, and along dilations $\phi_\rho(r) = \phi(r/\rho)$
+the action $S(\rho) = \rho^2 K + \rho^4 P$ (with $P = \int V < 0$) is
+unbounded below. Coleman, Glaser & Martin (Phys. Rev. D **15**, 3200,
+1977) showed that the bounce minimizes the action only *among solutions of
+the equations of motion* — a class to which an arbitrary trial profile
+does not belong. **This code never solves the bounce equation.** Instead
+it evaluates $S$ on the Fubini–Lipatov (conformal) profile family and
+minimizes over its single scale parameter. The result is a
+**trial-profile action estimate**; **no rigorous inequality relating
+$S_{\rm trial}$ to the true bounce action is established here** — the
+trial action may lie above or below $S_{\rm bounce}$, and along the family
+itself it can become negative where the ansatz breaks down. What the
+scale minimization does provide is the dominant contribution of the
+family to the decay rate in the sense of Isidori–Ridolfi–Strumia — an
+estimate, not a bound.
 
 ### 5.2 The Fubini–Lipatov profile
 
@@ -318,9 +335,13 @@ $S_{\rm kin}/|S_{\rm pot}|$ ratio allows them to be identified.
 
 ## 7. Interpretation of outputs
 
-* `S_exact` — the optimized ansatz action $S_\ast$ (the name is historical;
-  it is *not* the exact bounce action). Dimensionless.
-* `S_approx` — the strict conformal estimate $8\pi^2/(3|\lambda_{\min}|)$.
+* `S_trial` — the optimized trial-profile action $S_\ast$ (renamed from the
+  misleading `S_exact` in 2026-10; it is **not** the exact bounce action
+  and no bound relation to it is established). Dimensionless. Negative
+  values occur where the ansatz breaks down; such points carry
+  `method_flag = ANSATZ_FAILED` and status 0 (undetermined).
+* `S_conformal` — the strict conformal estimate
+  $8\pi^2/(3|\lambda_{\min}|)$ (renamed from `S_approx`).
 * `S_kinetic`, `S_potential` — the closed-form kinetic term and the
   Simpson-integrated potential term at the optimal radius; their ratio
   $S_{\rm kin}/|S_{\rm pot}| = 2$ in the pure-quartic limit.
@@ -328,6 +349,10 @@ $S_{\rm kin}/|S_{\rm pot}|$ ratio allows them to be identified.
 * `mu_inst` — the $\lambda_{\rm eff}$ zero-crossing scale $\mu_1$ (GeV).
 * `lambda_min` — the minimum of $\lambda_{\rm eff}(\mu)$ over the running
   range.
+* `method_flag` — 0 OK, 1 kinetic shortcut, 2 fence (no action computed,
+  `S_trial` = NaN), 3 ansatz failed (non-positive action), 4
+  perturbativity lost. Status 0 always accompanies flags 2 and 3: those
+  points are undetermined, not metastable/unstable.
 
 ## 8. Known limitations
 
@@ -335,7 +360,7 @@ See [limitations.md](limitations.md) for the consolidated list — most
 importantly: the conformal ansatz (no bounce-equation solve), the
 high-field potential (false vacuum at the origin), the assumed
 $c_6 = 1$, the prefactor-scale choice in the threshold, the linearized
-matching, and the unverified 4-loop $g_3$ term.
+matching, and the incomplete 4-loop $g_3$ running.
 
 ## References
 

@@ -33,7 +33,7 @@ def build_grid(args):
     return [(mt, mh) for mt in mts for mh in mhs]
 
 
-def run_chunk(binary, args, start, end, chunk_dir):
+def run_chunk(binary, args, start, end, chunk_dir, retries=2):
     produced = os.path.join(chunk_dir, f"{args.mode}_chunk_{start}.csv")
     cmd = [
         binary,
@@ -47,15 +47,20 @@ def run_chunk(binary, args, start, end, chunk_dir):
         "--end", str(end),
         "--output-dir", chunk_dir,
         "--precision", str(args.precision),
+        "--c6", str(args.c6),
     ]
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        sys.stderr.write(result.stdout)
-        sys.stderr.write(result.stderr)
-        raise RuntimeError(f"chunk [{start}, {end}) failed with code {result.returncode}")
-    if not os.path.isfile(produced):
-        raise RuntimeError(f"chunk [{start}, {end}) produced no output file")
-    return produced
+    # Retry: transient file locks (e.g. antivirus scans on Windows) can make
+    # a chunk fail spuriously; a failed chunk is rerun from scratch.
+    last_err = None
+    for attempt in range(retries + 1):
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode == 0 and os.path.isfile(produced):
+            return produced
+        last_err = (result.returncode, result.stdout, result.stderr)
+    sys.stderr.write(last_err[1])
+    sys.stderr.write(last_err[2])
+    raise RuntimeError(f"chunk [{start}, {end}) failed after "
+                       f"{retries + 1} attempts (code {last_err[0]})")
 
 
 def main():
@@ -75,6 +80,8 @@ def main():
                         help="aggregated output CSV (default: results/<mode>_data.csv)")
     parser.add_argument("--precision", type=int, default=12,
                         help="significant digits in the CSV output")
+    parser.add_argument("--c6", type=float, default=1.0,
+                        help="coefficient of the Planck-suppressed phi^6 operator")
     parser.add_argument("--results-dir", default="results")
     parser.add_argument("--keep-chunks", action="store_true")
     args = parser.parse_args()

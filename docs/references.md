@@ -26,6 +26,13 @@ or checked against, this codebase are listed. No citation is decorative.
    — Fluctuation prefactor and the interpretation of the decay rate used in
    the threshold criterion.
 
+4b. **S. Coleman, V. Glaser and A. Martin**, *Action Minima Among Solutions
+   to a Class of Euclidean Scalar Field Equations*, Phys. Rev. D **15**
+   (1977) 3200.
+   — The bounce minimizes the action only among solutions of the equations
+   of motion; cited precisely to state why a non-solution trial profile
+   carries no bound (docs/theory.md §5.1).
+
 ## Standard Model vacuum stability (the physics context and benchmarks)
 
 5. **G. Isidori, G. Ridolfi and A. Strumia**, *On the Metastability of the
@@ -52,13 +59,20 @@ or checked against, this codebase are listed. No citation is decorative.
 
 8. **A. Andreassen, W. Frost and M. D. Schwartz**, *Scale Invariant
    Instantons and the Complete Lifetime of the Standard Model*, Phys. Rev. D
-   **97** (2018) 056006 [arXiv:1707.08123].
+   **97** (2018) 056006 [arXiv:1707.08124].
    — State-of-the-art bounce computation including the prefactor; the basis
    for the caveat that neglecting the prefactor's scale dependence (as this
    code does) shifts lifetime estimates, and for the observation that the
    conformal profile is the correct saddle in the pure-quartic limit.
 
 ## Numerical methods
+
+8b. **G. van Ritbergen, J. A. M. Vermaseren and S. A. Larin**, *Four-Loop
+   Beta Functions in the SU(N) Yang-Mills Theory*, Phys. Lett. B **400**
+   (1997) 379 [arXiv:hep-ph/9701390].
+   — Source of the pure-QCD four-loop coefficient
+   $eta_3(n_f{=}6) = 2472.28$ used in the $g_3$ running (sign convention
+   documented in `src/RGE.cpp`).
 
 9. **W. H. Press, S. A. Teukolsky, W. T. Vetterling and B. P. Flannery**,
    *Numerical Recipes*, 3rd ed. (Cambridge University Press, 2007),
@@ -87,6 +101,10 @@ could not be re-established for every coefficient during the audit — most
 notably the 4-loop $g_3$ term with coefficient `2472.28`
 (`docs/audit-notes.md`, finding 13). Where a check was possible (matching
 central values, the $M_h$-slope of $\lambda(M_t)$, one-loop beta-function
-coefficients) the code agrees with the sources above as documented in
-`docs/validation.md`; where it was not possible, the term is flagged rather
-than silently trusted or removed.
+coefficients, the four-loop QCD $\beta_3$ arithmetic) the code agrees with
+the sources above as documented in `docs/validation.md`; where it was not
+possible (line-by-line 3-loop coefficients), the limitation is flagged in
+`docs/limitations.md` rather than silently trusted or removed. The NNLO
+matching constants are taken as printed in the latest arXiv version of
+Buttazzo et al.; note that v2/v3 of that paper modified the NNLO $g_2,
+g_Y$ results.

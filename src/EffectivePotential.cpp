@@ -8,7 +8,12 @@ double get_lambda_eff(const StandardModelParameters& p) {
     // with running couplings at mu = phi, so that the logs are the standard
     // field-dependent mass ratios m_i^2(phi)/phi^2:
     //   m_t^2 = yt^2 phi^2 / 2,  m_W^2 = g2^2 phi^2 / 4,
-    //   m_Z^2 = (g1^2 + g2^2) phi^2 / 4.
+    //   m_Z^2 = (gY^2 + g2^2) phi^2 / 4.
+    // The hypercharge coupling in StandardModelParameters is GUT-normalized
+    // (g1 = sqrt(5/3) gY, see RGE.hpp), so the physical Z combination is
+    //   gY^2 + g2^2 = (3/5) g1^2 + g2^2.
+    // (An earlier version used g1^2 + g2^2 here, overestimating gY^2 by 5/3;
+    // fixed 2026-10, see CHANGELOG and docs/audit-notes.md.)
     // In terms of V1 = sum_i n_i m_i^4/(64 pi^2) (ln(m_i^2/mu^2) - c_i) with
     // mu = phi, lambda_eff = lambda + 4 V1 / phi^4.
     double yt2 = p.yt * p.yt;
@@ -19,7 +24,8 @@ double get_lambda_eff(const StandardModelParameters& p) {
     double g2_4 = g2_2 * g2_2;
     double term_W = 0.375 * g2_4 * (std::log(0.25 * g2_2) - 5.0/6.0);
 
-    double g12 = p.g1 * p.g1 + g2_2;
+    double gY2 = 0.6 * p.g1 * p.g1;          // physical hypercharge squared
+    double g12 = gY2 + g2_2;                  // m_Z^2 combination
     double g12_2 = g12 * g12;
     double term_Z = 0.1875 * g12_2 * (std::log(0.25 * g12) - 5.0/6.0);
 

@@ -64,6 +64,64 @@ a full audit (see `docs/audit-notes.md`).
 - Dead code (`V1_loop`, the unused adaptive RK4 stepper, unused constants).
 - Legacy constant naming cleaned up (`planck_mass`; see docs/audit-notes.md).
 
+## [2.2.0] - 2026-10-02 (referee-correction pass)
+
+Substantive scientific corrections implementing an independent referee
+report (`SMVac_referee_report.md`, auditing HEAD a1bca57). All datasets and
+figures regenerated; every grid point re-evaluated.
+
+### Fixed (physics)
+- **Z Coleman-Weinberg normalization (BUG)**: the Z mass combination used
+  the GUT-normalized g1^2 instead of (3/5) g1^2 + g2^2
+  (src/EffectivePotential.cpp). Post-fix benchmark values: SM-point trial
+  action 2103.10 -> 2168.69 (+3.1%), mu1 6.22e10 -> 7.60e10 GeV,
+  Mh_crit(173.1) 129.17 -> 129.05 GeV.
+- **4-loop g3 sign**: 2472.28 traced to the pure-QCD beta_3(nf=6)
+  (van Ritbergen, Vermaseren & Larin 1997); the code's own convention
+  (-beta_i g^(2i+4), with -7, -26, +65/2 at nf=6) requires -2472.28. The
+  previous +2472.28 had the wrong sign.
+
+### Changed (claims)
+- **"Variational upper bound on the true bounce action" retracted
+  everywhere**: the bounce is a saddle point of the action, not a minimum
+  over general field configurations; the code's quantity is now called the
+  trial-profile action and no bound relation to the exact bounce action is
+  claimed (docs/theory.md §5.1, with the Coleman-Glaser-Martin 1977
+  scope statement).
+- **"+30% RG improvement near the boundary" retracted**: with c6 = 0 the
+  trial action matches the conformal estimate to <1% at every tested
+  point; the near-boundary enhancement is the assumed c6 = 1 Planck
+  operator. c6 is now a runtime parameter (--c6) and the sensitivity scan
+  is committed (RESULTS.md, tests/physics/test_method_flags.cpp).
+- **Literature comparison re-anchored**: the unverified "128.6 GeV
+  (Buttazzo Fig. 1)" removed; tests/physics/test_boundary.cpp now uses
+  Degrassi et al. (2012) eq. (2), 129.4 +- 1.0 GeV at the same inputs
+  (Mt = 173.1, alpha_s = 0.1184), with like-for-like caveats stated.
+- Renames: S_exact -> S_trial, S_approx -> S_conformal,
+  classify_buttazzo -> classify_conformal (names that implied more than
+  the calculation establishes).
+
+### Added
+- **method_flag column** in all CSVs and in StabilityResult: OK /
+  KINETIC_SHORTCUT / FENCE / ANSATZ_FAILED / PERTURBATIVITY_LOST. Fence
+  points get S_trial = NaN (no more 1e100 sentinels in output); points
+  with non-positive trial action are status 0 (undetermined), never
+  counted as metastable/unstable.
+- tests/unit/test_lambda_eff_normalization.cpp (Z normalization,
+  discriminating against the old formula), tests/physics/test_method_flags.cpp
+  (flag taxonomy + c6 separation); suite extended 11 -> 13 tests.
+- RESULTS.md: the defensible results after the corrections.
+
+### Fixed (documentation)
+- "16-decade" bracket corrected (+-8 in ln R = ~7 decades in R); M_W
+  "implemented" claim corrected (it is not an input of the matching
+  function); (115, 180) "deep metastability" label corrected (the code
+  classifies it unstable); AFS arXiv number corrected (1707.08123 ->
+  1707.08124); g1(Mt) value unified at 0.462563; gauge-dependence of mu1
+  and the amplitude/potential mismatch of the trial family documented as
+  open limitations; full-plane figure labeled an extended computational
+  visualization (linearized matching).
+
 ## [2.1.0] - 2026-09-30
 
 ### Changed

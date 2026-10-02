@@ -130,14 +130,15 @@ void write_benchmark_json(const std::string& filename,
     out << std::setprecision(17) << "{";
     bool first = true;
     for (const auto& pt : points) {
-        auto fl = classify_buttazzo(pt.Mh, pt.Mt);
+        auto fl = classify_conformal(pt.Mh, pt.Mt);
         auto num = classify_stability(pt.Mh, pt.Mt);
         if (!first) out << ", ";
         first = false;
         out << "\"" << pt.name << "\": {\"Mh\": " << pt.Mh << ", \"Mt\": " << pt.Mt
-            << ", \"FL_action\": " << std::get<1>(fl)
-            << ", \"Numerical_action\": " << num.S_exact
-            << ", \"Status\": " << num.status << "}";
+            << ", \"Conformal_action\": " << std::get<1>(fl)
+            << ", \"Trial_action\": " << num.S_trial
+            << ", \"Status\": " << num.status
+            << ", \"Method_flag\": " << num.method_flag << "}";
     }
     out << "}\n";
 }
@@ -149,10 +150,10 @@ void write_benchmark_json_analytical(const std::string& filename,
     out << std::setprecision(17) << "{";
     bool first = true;
     for (const auto& pt : points) {
-        auto fl = classify_buttazzo(pt.Mh, pt.Mt);
+        auto fl = classify_conformal(pt.Mh, pt.Mt);
         if (!first) out << ", ";
         first = false;
-        out << "\"" << pt.name << "\": {\"FL_action\": " << std::get<1>(fl)
+        out << "\"" << pt.name << "\": {\"Conformal_action\": " << std::get<1>(fl)
             << ", \"Status\": " << std::get<0>(fl) << "}";
     }
     out << "}\n";
@@ -168,8 +169,9 @@ void write_benchmark_json_numerical(const std::string& filename,
         auto num = classify_stability(pt.Mh, pt.Mt);
         if (!first) out << ", ";
         first = false;
-        out << "\"" << pt.name << "\": {\"Numerical_action\": " << num.S_exact
-            << ", \"Status\": " << num.status << "}";
+        out << "\"" << pt.name << "\": {\"Trial_action\": " << num.S_trial
+            << ", \"Status\": " << num.status
+            << ", \"Method_flag\": " << num.method_flag << "}";
     }
     out << "}\n";
 }

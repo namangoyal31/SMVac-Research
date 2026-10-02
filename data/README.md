@@ -16,6 +16,7 @@ from. The resolution-convergence between the grids is quantified by
 | `numerical_zoom_0p1GeV.csv` | RG-improved | Mh [112, 138], Mt [155, 185] | 0.1 GeV | 78,561 | 5.5 MB |
 | `analytical_zoom_0p1GeV.csv` | conformal | Mh [112, 138], Mt [155, 185] | 0.1 GeV | 78,561 | 1.7 MB |
 | `numerical_boundary_0p05GeV.csv` | RG-improved | Mh [110, 140], Mt [162, 182] | 0.05 GeV | 241,001 | 18 MB |
+| `numerical_zoom_0p1GeV_c6p0.csv` | RG-improved | Mh [112, 138], Mt [155, 185] | 0.1 GeV, c6 = 0 | 78,561 | 5.5 MB |
 | `analytical_boundary_0p05GeV.csv` | conformal | Mh [110, 140], Mt [162, 182] | 0.05 GeV | 241,001 | 5.5 MB |
 | `numerical_full_plane_1p0GeV.csv` | RG-improved | Mh, Mt in [0, 250] GeV | 1.0 GeV | 63,001 | 3.5 MB |
 | `analytical_full_plane_1p0GeV.csv` | conformal | Mh, Mt in [0, 250] GeV | 1.0 GeV | 63,001 | 1.0 MB |
@@ -61,10 +62,15 @@ size.
 
 ## Columns and status codes
 
-Numerical mode: `Mt, Mh_calc, Stability, S_exact, S_approx, S_kinetic,
-S_potential, S_threshold, mu_inst, lambda_min`; analytical mode:
-`Mt, Mh_calc, Stability, S_approx` (schema in
-[../docs/numerical-method.md](../docs/numerical-method.md)).
+Numerical mode: `Mt, Mh_calc, Stability, S_trial, S_conformal, S_kinetic,
+S_potential, S_threshold, mu_inst, lambda_min, method_flag, c6`;
+analytical mode: `Mt, Mh_calc, Stability, S_conformal, method_flag`
+(schema in [../docs/numerical-method.md](../docs/numerical-method.md)).
+`method_flag`: 0 OK, 1 kinetic shortcut, 2 fence (no action computed,
+`S_trial` = NaN), 3 ansatz failed (non-positive action), 4 perturbativity
+lost. Status 0 always accompanies flags 2 and 3: those points are method
+failures, not physical verdicts. The `c6` column records the
+Planck-operator coefficient used (default 1).
 
 | code | meaning |
 |------|---------|

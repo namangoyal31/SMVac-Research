@@ -5,13 +5,13 @@
 
 namespace SMVacuumDecay {
 
-// Analytical (strict conformal) estimate: the RG equations are run up to the
-// Planck scale, the minimum lambda_eff is located, and the Fubini-Lipatov
-// action S = 8 pi^2 / (3 |lambda_min|) is formed from it. This coincides with
-// the exact bounce action in the pure-quartic limit, where the couplings do
-// not run; away from it the RG-improved ansatz in CanonicalBounce.cpp is the
-// more accurate estimator.
-std::tuple<int, double, double> classify_buttazzo(double Mh_input, double Mt) {
+// Strict conformal (Fubini-Lipatov) estimate evaluated on the RG-evolved
+// couplings; see the header for the precise characterization. In the
+// pure-quartic limit (constant couplings) S_conformal is the exact bounce
+// action; with running couplings both this estimate and the trial-profile
+// action of CanonicalBounce.cpp are approximations without a rigorous
+// mutual ordering.
+std::tuple<int, double, double> classify_conformal(double Mh_input, double Mt) {
     StandardModelParameters y = get_nnlo_matching(Mh_input, Mt);
     double Mh_calc = Mh_input;
     double t0 = 2*std::log(Mt);

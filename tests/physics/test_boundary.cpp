@@ -1,15 +1,24 @@
 // Literature comparison of the stability classification.
 //
-// The absolute-stability boundary of the SM (where lambda_eff stays positive
-// up to the Planck scale) is known from dedicated NNLO studies (Buttazzo et
-// al. 2013, Fig. 1) to lie near Mh_crit ~ 128.6 GeV at Mt ~ 173.3 GeV, with
-// a theoretical spread of a few tenths of a GeV between state-of-the-art
-// implementations. This code uses a 3-loop RGE with a linearized matching
-// and the high-field potential, so only a band comparison is appropriate:
-// the measured boundary must fall within +/- 2.5 GeV of the published
-// central value. The physical point (125.1, 173.1) must be metastable,
-// matching the literature consensus that the SM vacuum lifetime exceeds the
-// age of the universe.
+// Anchor (verified against the published text): Degrassi et al., JHEP 08
+// (2012) 098 [arXiv:1205.6497], introduction eq. (2):
+//
+//   Mh[GeV] > 129.4 + 1.4 (Mt[GeV] - 173.1)/0.7
+//                  - 0.5 (alpha_s(M_Z) - 0.1184)/0.0007  +- 1.0_th
+//
+// At the central inputs (Mt = 173.1 GeV, alpha_s = 0.1184 -- exactly the
+// values used by this code) the bound is Mh_crit = 129.4 +- 1.0 GeV.
+// This is the closest like-for-like anchor available: the code uses the
+// same inputs and the same lambda_min = 0 definition of absolute
+// stability, but omits the 2-loop effective potential and the 3-loop QCD
+// threshold correction included in Degrassi et al., and linearizes the
+// matching, so agreement at the ~0.1-0.5 GeV level is expected but is not
+// a precision validation. The test enforces the published 1-sigma theory
+// band and prints the distance explicitly.
+//
+// The physical point (125.1, 173.1) must be metastable, matching the
+// literature consensus that the SM vacuum lifetime exceeds the age of the
+// universe.
 #include <SMVacuumDecay/CanonicalBounce.hpp>
 #include <cmath>
 #include <cstdio>
@@ -18,8 +27,7 @@ using namespace SMVacuumDecay;
 
 static int failures = 0;
 
-// Locate the stability boundary in Mh at fixed Mt by bisection:
-// for Mh below the boundary the vacuum is (meta)stable-negative... precisely:
+// Locate the absolute-stability boundary in Mh at fixed Mt by bisection:
 // status 1 (lambda_min >= 0) for Mh above the boundary, status 2/3 below.
 static double stability_boundary_Mh(double Mt, double lo, double hi) {
     for (int it = 0; it < 40; ++it) {
@@ -39,9 +47,19 @@ int main() {
 
     std::printf("=== Absolute stability boundary at Mt = 173.1 GeV ===\n");
     double Mh_crit = stability_boundary_Mh(173.1, 124.0, 136.0);
-    const double literature = 128.6; // Buttazzo et al. (2013) at Mt ~ 173.3 GeV
-    std::printf("measured Mh_crit = %.3f GeV   literature ~ %.1f GeV\n", Mh_crit, literature);
-    if (std::abs(Mh_crit - literature) > 2.5) { std::printf("FAIL boundary-band\n"); ++failures; }
+    // Degrassi et al. (2012), eq. (2) at Mt = 173.1, alpha_s = 0.1184:
+    const double degrassi_central = 129.4;
+    const double degrassi_sigma_th = 1.0;
+    double distance = Mh_crit - degrassi_central;
+    std::printf("measured Mh_crit = %.3f GeV   Degrassi eq.(2): 129.4 +- 1.0 (th) GeV\n",
+                Mh_crit);
+    std::printf("distance = %+.3f GeV = %.2f sigma_th\n",
+                distance, distance / degrassi_sigma_th);
+    if (std::abs(distance) > degrassi_sigma_th) { std::printf("FAIL boundary-band\n"); ++failures; }
+    std::printf("NOTE: same inputs by construction (alpha_s = 0.1184 hard-wired);\n"
+                "this code omits 2-loop potential and 3-loop QCD threshold terms,\n"
+                "so this is a consistency check within the published theory band,\n"
+                "not a precision validation.\n");
 
     // Direction sanity: below the boundary the vacuum cannot be absolutely
     // stable, above it lambda_min must be non-negative.

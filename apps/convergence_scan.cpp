@@ -76,10 +76,10 @@ int main(int argc, char* argv[]) {
     std::cout << std::setprecision(12);
 
     if (mode == "dt") {
-        std::cout << "dt,S_exact\n";
+        std::cout << "dt,S_trial\n";
         for (double dt : {0.4, 0.2, 0.1, 0.05, 0.025, 0.0125}) {
             StabilityResult r = classify_stability(Mh, Mt, dt);
-            std::cout << dt << "," << r.S_exact << "\n";
+            std::cout << dt << "," << r.S_trial << "\n";
         }
         return 0;
     }

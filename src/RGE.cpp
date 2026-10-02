@@ -119,11 +119,19 @@ double betaG3sq(const StandardModelParameters& p) {
         65*g3_4/2 + 109*g2_4/8 - 523*g1_4/120 +
         21*g3_2*g2_2 + 77*g3_2*g1_2/15 - 3*g2_2*g1_2/40
     );
-    // 4-loop pure-gauge QCD contribution. The numeric coefficient 2472.28
-    // predates this reorganization and could not be traced to a published
-    // source; its impact is ~0.1% on the benchmark actions (see
-    // docs/audit-notes.md, finding 13).
-    double term4 = g3_10/LOOP4 * 2472.28;
+    // 4-loop pure-QCD contribution: -beta_3(nf=6) g3^10/(16 pi^2)^4 with
+    // beta_3(nf=6) = 149753/6 + 3564 zeta3
+    //                - nf (1078361/162 + 6508/27 zeta3)
+    //                + nf^2 (50065/162 + 6472/81 zeta3) + 1093/729 nf^3
+    //              = 2472.28 at nf = 6
+    // (van Ritbergen, Vermaseren, Larin 1997). The sign follows the same
+    // convention as the loop terms above (-beta_i g^(2i+4), with the code's
+    // -7, -26, +65/2 = -beta_0, -beta_1, -beta_2 at nf=6); an earlier
+    // version had +2472.28, inconsistent with that convention (fixed
+    // 2026-10). Only the pure-QCD nf-dependent piece is included: the
+    // remaining SM 4-loop terms (g1, g2, Yukawa insertions) are absent, so
+    // the g3 running is not a complete 4-loop SM result.
+    double term4 = -g3_10/LOOP4 * 2472.28;
 
     return term1 + term2 + term3 + term4;
 }

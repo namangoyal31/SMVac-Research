@@ -24,16 +24,18 @@ black = non-perturbative / outside the range of validity. Continuous
 quantities (actions, fractional differences) use heatmaps instead, with the
 colour scale stated in each caption.
 
-**Method reminder (applies to every figure).** The "RG-improved action"
-`S_exact` is evaluated on the fixed Fubini–Lipatov profile with running
+**Method reminder (applies to every figure).** The "trial-profile action"
+`S_trial` is evaluated on the fixed Fubini–Lipatov profile with running
 couplings — a semi-analytical estimator, **not** a solution of the bounce
-equation and **not** the exact SM bounce action. It is a variational
-*estimate* whose profile family is one-dimensional; the absolute-stability
-boundary (`λ_min = 0`) does not depend on the ansatz and is the robust
-output. The potential is the high-field form `V = λ_eff(φ)φ⁴/4` (false
-vacuum at the origin), regularized by a Planck-suppressed `φ⁶` term with
-the **assumed** coefficient `c₆ = 1`. See `docs/theory.md` and
-`docs/limitations.md`.
+equation and **not** the exact SM bounce action. **No inequality relating
+it to the exact bounce action is established** (the bounce is a saddle of
+the action, not a minimum over general configurations); the
+absolute-stability boundary (`λ_min = 0`) does not depend on the ansatz
+and is the robust output. The potential is the high-field form
+`V = λ_eff(φ)φ⁴/4` (false vacuum at the origin), regularized by a
+Planck-suppressed `φ⁶` term with the **assumed** coefficient `c₆ = 1`
+(this assumed operator dominates the near-boundary action — see figure 06).
+See `docs/theory.md` and `docs/limitations.md`.
 
 ---
 
@@ -83,14 +85,15 @@ contours show how steeply the action falls toward instability.
 
 **What:** focused view of the benchmark point, evaluated on the **0.05 GeV
 boundary dataset** (`data/numerical_boundary_0p05GeV.csv`), with
-quantitative annotations read from the pipeline output: `S* = 2103.1` vs threshold `S_th = 483.3` (metastable),
-zero-crossing scale `μ₁ = 6.2×10¹⁰ GeV`, and the grid-level distance to
-absolute stability in `Mh`. Ellipses as in figure 02.
+quantitative annotations read from the pipeline output: `S_trial = 2168.7`
+vs threshold `S_th = 484.1` (metastable), zero-crossing scale
+`μ₁ = 7.6×10¹⁰ GeV`, and the grid-level distance to absolute stability in
+`Mh`. Ellipses as in figure 02.
 
 ## 04_action_contours.png
 
 **What:** magnitude of the RG-improved ansatz action over the
-phenomenological window. Filled map of `log10 S_exact` (viridis scale;
+phenomenological window. Filled map of `log10 S_trial` (viridis scale;
 `S` dimensionless) with labeled constant-action contours. The absolutely
 stable region (hatched, lower right) has no bounce. The orange strip along
 the stability boundary marks points where **no full action integral is
@@ -108,7 +111,7 @@ boundary, which is why the classification is most sensitive there.
 
 **What:** classification **difference map** over the full plane: for every
 0.5-GeV grid point, the classification from the strict conformal estimate
-`S_approx = 8π²/(3|λ_min|)` (constant-coupling limit) is compared with the
+`S_conformal = 8π²/(3|λ_min|)` (constant-coupling limit) is compared with the
 RG-improved classification. Grey background: the two agree. Blue: the
 RG-improved evaluation classifies the point **more stable** than the
 conformal estimate; orange: **less stable**; black: either point is an
@@ -126,7 +129,7 @@ The full-plane version of the original SMVac "overlay" figure.
 ## 06_action_fractional_difference.png
 
 **What:** heatmap of the relative difference
-`(S_exact − S_approx)/S_approx` over the phenomenological window at 0.1 GeV
+`(S_trial − S_conformal)/S_conformal` over the phenomenological window at 0.1 GeV
 sampling (diverging red–blue scale; defined only where both actions
 exist). Answers: *where
 does RG improvement materially change the action?* Near the
@@ -146,7 +149,7 @@ sampling (computed from the committed dataset; no point discarded):
 - light orange: kinetic-shortcut region (`|λ_R| ≲ 3×10⁻⁴`): the action is
   returned without the potential integral and is only a rough overestimate;
 - dark orange: fence points — no radius in the search bracket gives
-  `λ_R < 0`, so the exported action is the `10¹⁰⁰` sentinel, not a number;
+  `λ_R < 0`; no action is computed (`S_trial = NaN`, `method_flag = FENCE`);
 - brown dots: ansatz breakdown (classified unstable with `S ≤ 0`) — they
   trace the entire stability boundary;
 - black: non-perturbative — `|λ|` or `y_t` exceeds `4π` before the Planck

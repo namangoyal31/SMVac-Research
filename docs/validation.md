@@ -68,14 +68,14 @@ Studies of the **production pipeline** at the SM benchmark point
 $(125.1, 173.1)$ GeV:
 
 * **RGE step size.** $\Delta t \in \{0.2, 0.1, 0.05, 0.025\}$ gives
-  $S_\ast = 2103.1111,\ 2103.1046,\ 2103.1030,\ 2103.1026$: successive
+  $S_\ast = 2168.6962,\ 2168.6896,\ 2168.6879,\ 2168.6874$: successive
   differences shrink by a factor $\simeq 4$ per halving, and the production
   step $\Delta t = 0.1$ agrees with the four-times-finer run to
-  $9.6\times10^{-7}$ relative. The RG evolution is therefore not a
+  $1.0\times10^{-6}$ relative. The RG evolution is therefore not a
   significant source of error at production settings.
 * **Quadrature.** At the optimal radius, $S(R_\ast)$ for $N \in \{256,
-  1024, 4096, 16384\}$ Simpson points agrees to $4.3\times10^{-9}$ relative
-  between $N = 1024$ and $N = 16384$. The differences between successive $N$
+  1024, 4096, 16384\}$ Simpson points agrees to $10^{-9}$ relative
+  between $N = 2048$ and $N = 16384$. The differences between successive $N$
   are non-monotone at the $\sim10^{-9}$ relative level: the production
   setting $N = 2048$ already sits at the round-off floor (the potential
   integral involves large cancellations), so no meaningful order estimate
@@ -83,7 +83,7 @@ $(125.1, 173.1)$ GeV:
   convergence is verified separately on smooth integrands in
   `tests/unit/test_numerics.cpp` (observed order 4.00).
 * **Radius minimization.** The golden-section search agrees with a 50,001-point
-  grid scan of the same 16-decade bracket to $1.2\times10^{-10}$ relative.
+  grid scan of the same bracket ($\pm 8$ in $\ln R$, ~7 decades in $R$) to $1.2\times10^{-10}$ relative.
 
 ## 3. Literature comparison (`tests/physics/test_boundary.cpp`)
 
@@ -91,19 +91,29 @@ $(125.1, 173.1)$ GeV:
   **metastable** (status 2), matching the consensus that the SM vacuum
   lifetime exceeds the age of the universe.
 * **Absolute stability boundary.** Bisection at $M_t = 173.1$ GeV locates
-  $\lambda_{\min} = 0$ at $M_h^{\rm crit} = 129.17$ GeV, within $0.6$ GeV of
-  the published NNLO value $M_h^{\rm crit} \simeq 128.6$ GeV at
-  $M_t \simeq 173.3$ GeV (Buttazzo et al. 2013, Fig. 1). The residual
-  $\sim0.6$ GeV shift is consistent with the linearized matching and the
-  high-field potential used here (the test enforces a $\pm2.5$ GeV band).
-  For reference, the pre-audit matching (with the untraceable $g_2(M_t)$)
-  placed the boundary at $\simeq 128.8$ GeV but overestimated the actions
-  away from the boundary by 2–24%.
-* **Deep metastability limit.** At $(115, 180)$ GeV the optimized ansatz
-  action agrees with the strict conformal estimate to $2.1\times10^{-4}$
-  relative (running corrections are negligible deep in the metastable
-  region), and near the boundary at $(134.75, 176.5)$ the two differ by
-  $+29.7\%$ — quantifying when the running-coupling evaluation matters.
+  $\lambda_{\min} = 0$ at $M_h^{\rm crit} = 129.05$ GeV. Anchor (verified
+  against the published text): Degrassi et al. (2012), introduction
+  eq. (2): $M_h > 129.4 + 1.4\frac{M_t - 173.1}{0.7} -
+  0.5\frac{\alpha_s(M_Z) - 0.1184}{0.0007} \pm 1.0_{\rm th}$ — at the
+  central inputs (identical to this code's: $M_t = 173.1$,
+  $\alpha_s = 0.1184$) the bound is $129.4 \pm 1.0$ GeV, i.e. the code
+  sits $0.35\sigma_{\rm th}$ below it (enforced by
+  `tests/physics/test_boundary.cpp`). This is a consistency check within
+  the published theory band, **not** a precision validation: the code
+  omits the 2-loop effective potential and 3-loop QCD threshold pieces of
+  Degrassi et al. and linearizes the matching. (An earlier version of
+  this section anchored on an unverified "$\simeq 128.6$ GeV, Buttazzo
+  Fig. 1" — retracted in the 2026-10 referee pass.)
+* **Deep negative-coupling regime.** At $(115, 180)$ GeV (classified
+  *unstable* by the threshold criterion) the trial action agrees with the
+  strict conformal estimate to a few $10^{-4}$ relative, and near the
+  boundary at $(134.75, 176.5)$ the two differ by
+  $+33\%$ — but the c6 sensitivity test
+  (`tests/physics/test_method_flags.cpp`) shows this difference is
+  produced by the assumed $c_6 = 1$ Planck operator: with $c_6 = 0$ the
+  two actions agree to $-0.9\%$ there and to $-0.08\%$ at the SM point.
+  RG improvement of the potential alone moves the trial action by
+  $\lesssim 1\%$ everywhere tested.
 
 ## 4. What is *not* validated
 
@@ -111,51 +121,55 @@ Stated explicitly to avoid overclaiming:
 
 * **The ansatz itself.** No test validates that the conformal profile is a
   good approximation to the true bounce; it cannot, within this code —
-  there is no independent bounce solver to compare against. The action is a
-  variational upper bound, and absolute lifetime predictions inherit that
-  systematic (see `docs/limitations.md`).
+  there is no independent bounce solver to compare against. The trial
+  action has **no established relation (bound or otherwise) to the exact
+  bounce action**: the bounce is a saddle of the action, so trial actions
+  may lie above or below it (see `docs/limitations.md` item 1).
 * **The $c_6 = 1$ Planck regularization.** No literature value is
   established; only the existence and sign of the effect are documented.
 * **The 4-loop $g_3$ coefficient 2472.28.** Provenance unknown; impact
   measured at $\sim0.1\%$ on benchmark actions by toggling the term.
 * **Literature bounce actions.** The code's $S$ values are not expected to
-  match full bounce computations (e.g. $\sim 200$–$400$ in the literature
-  for SM-like points at the true saddle) and are not marketed as such; they
-  are upper bounds computed on the constrained profile family.
+  match full bounce computations and are not marketed as such; they are
+  trial-profile estimates on a constrained family with unquantified
+  trial-family dependence.
 
 ## 6. Resolution convergence of the phase-diagram datasets
 
 The classification datasets exist at five grid spacings (full plane 1.0
 and 0.5 GeV; zoom 0.25 and 0.1 GeV; boundary strip 0.05 GeV over
-`Mh ∈ [110, 140] × Mt ∈ [162, 182] GeV`). Every grid point was evaluated
-by the pipeline (no interpolation between resolutions); the comparison is
+`Mh ∈ [110, 140] × Mt ∈ [162, 182] GeV`), all regenerated after the
+2026-10 referee corrections. Every grid point was evaluated by the
+pipeline (no interpolation between resolutions); the comparison is
 automated in `scripts/check_resolution_convergence.py`. Results at
 `Mt = 173 GeV`:
 
 | dataset | grid-level last non-stable Mh | lambda_min = 0 crossing |
 |---|---|---|
-| full 1.0 GeV | 128.00 | 128.964 |
-| full 0.5 GeV | 128.50 | 128.964 |
-| zoom 0.25 GeV | 128.75 | 128.965 |
-| zoom 0.1 GeV | 128.90 | 128.965 |
-| boundary 0.05 GeV | 128.95 | 128.965 |
+| full 1.0 GeV | 128.00 | 128.833 |
+| full 0.5 GeV | 128.50 | 128.835 |
+| zoom 0.25 GeV | 128.75 | 128.836 |
+| zoom 0.1 GeV | 128.80 | 128.836 |
+| boundary 0.05 GeV | 128.80 | 128.836 |
 
 * The grid-level boundary (last non-stable cell) approaches the true
   crossing from below at the expected one-cell-per-refinement rate; the
   interpolated `lambda_min = 0` level set is resolution-independent to
-  **1 mGeV** across all five grids.
-* `S_exact` at grid points common to all datasets is bit-identical
+  **3 mGeV** across all five grids.
+* `S_trial` at grid points common to all datasets is bit-identical
   (deterministic pipeline; refinement adds points, never changes values).
 * Classification **area fractions** shift by <= 0.25% per halving
-  (e.g. full-plane metastable 0.0550 -> 0.0551, unstable 0.1973 ->
-  0.1981).
+  (e.g. full-plane stable 0.3881 -> 0.3897, metastable 0.0571 -> 0.0571,
+  unstable 0.1889 -> 0.1892). These fractions are grid-convergence
+  diagnostics of the sampled field, not physical predictions over the
+  whole plane (the linearized matching limits the physical
+  interpretation).
 * The ansatz-breakdown point count scales with cell area as expected for
-  a fixed-width strip: 522 -> 2,198 points in the full plane (1.0 -> 0.5
-  GeV, ratio 4.2 vs 4 expected from h^-2) and 62 -> 363 in the zoom window
-  (0.25 -> 0.1 GeV, ratio 5.9 vs 6.25), confirming a physical strip width
-  of ~1 grid cell (<= 0.1 GeV).
-* The conformal-vs-RG disagreement fraction is stable (0.75% -> 0.77% of
-  the full plane between 1.0 and 0.5 GeV).
+  a fixed-width strip: 347 -> 1,516 points in the full plane (1.0 -> 0.5
+  GeV, ratio 4.4 vs 4 expected from h^-2), confirming a physical strip
+  width of ~1 grid cell (<= 0.1 GeV).
+* The conformal-vs-trial-profile disagreement fraction is stable (1,669
+  of 251,001 points, 0.66%, on the 0.5 GeV plane).
 * The experimental point is classified **metastable** at every
   resolution.
 
@@ -170,5 +184,6 @@ RG trajectory and potential tables (`reference/v1.1/*.csv`, regenerated by
 single-point benchmark actions (`benchmark_results*.json`). These verify
 *reproducibility*, not physics correctness — the physics claims are covered
 by §1–§3 above. The current frozen values:
-FL action $= 2051.1373669116429$, ansatz action $= 2103.1046353416655$ at
-$(125.1, 173.1)$; status 2 for both.
+conformal action $= 2120.340020693041$, trial action $= 2168.6895796842282$
+(at $c_6 = 1$) at $(125.1, 173.1)$; status 2 (metastable), method flag OK
+for both. Frozen after the 2026-10 referee corrections.
